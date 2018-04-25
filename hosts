@@ -1,0 +1,35 @@
+apache1 ansible_host=10.0.0.21 ansible_port=22
+apache2 ansible_host=10.0.0.22 ansible_port=22
+dbserver1 ansible_host=10.0.0.31 ansible_port=22
+dbserver2 ansible_host=10.0.0.32 ansible_port=22
+dbserver3 ansible_host=10.0.0.33
+was1 ansible_host=10.0.0.41 ansible_port=22
+was2 ansible_host=10.0.0.42 ansible_port=22
+lb1 ansible_host=10.0.0.61 ansible_port=22 priority=50
+lb2 ansible_host=10.0.0.62 ansible_port=22 priority=51
+
+[apache-webservers]
+apache1
+apache2
+
+[mariadb]
+dbserver1
+
+[mariadb-galera]
+dbserver1
+dbserver2
+dbserver3
+
+[appservers]
+was1
+was2
+
+[loadbalancers]
+lb1
+lb2
+
+
+[loadbalancers:vars]
+frontend_port=80
+backend_port=80
+

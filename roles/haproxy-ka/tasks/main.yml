@@ -1,0 +1,26 @@
+- name: "install haproxy-keepalived"
+  apt: pkg={{ item }} state=present
+  with_items:
+  - haproxy
+  - keepalived
+
+- name: "copy haproxy.cfg"
+  template: src=../files/haproxy.cfg dest=/etc/haproxy/haproxy.cfg owner=root group=root mode=0644
+
+- name: "copy keepalived.conf"
+  template: src=../files/keepalived.conf dest=/etc/keepalived/keepalived.conf owner=root group=root mode=0644
+
+- name: "edit sysctl.conf"
+  shell: echo "\nnet.ipv4.ip_nonlocal_bind=1" >> /etc/sysctl.conf
+
+- name: "apply sysctl.conf"
+  shell: sysctl -p
+  notify:
+  - restart-keepalived
+
+#- name: restart-keepalived
+#  service: name=keepalived state=restarted
+
+#- name: restart-haproxy
+#  service: name=haproxy state=restarted
+

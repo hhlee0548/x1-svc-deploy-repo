@@ -1,0 +1,9 @@
+- name: restart-keepalived
+  service: name=keepalived state=restarted
+  notify:
+  - restart-haproxy
+
+- name: restart-haproxy
+  service: name=haproxy state=restarted
+
+

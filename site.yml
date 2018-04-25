@@ -1,0 +1,20 @@
+---
+- hosts: apache-webservers
+  become: true
+  roles:
+  - webservers
+
+- hosts: mariadb-galera
+  become: true
+  roles:
+  - mariadb-galera
+
+- hosts: appservers
+  become: true
+  roles:
+  - appservers
+
+- hosts: loadbalancers
+  become: true
+  roles:
+  - loadbalancers

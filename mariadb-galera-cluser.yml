@@ -1,0 +1,4 @@
+- hosts: mariadb-galera
+  become: true
+  roles:
+  - mariadb-galera

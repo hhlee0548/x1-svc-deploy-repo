@@ -1,0 +1,30 @@
+- name: install openjdk-8-jre
+  apt:
+    name: openjdk-8-jre
+    state: present
+
+- name: install tomcat8
+  apt:
+    name: tomcat8
+    state: present
+
+- name: copy server.xml to /etc/tomcat8/
+  copy:
+    src: ../files/server.xml
+    dest: /etc/tomcat8/server.xml
+  notify:
+  - restart-tomcat
+
+- name: copy web.xml to /etc/tomcat8/
+  copy:
+    src: ../files/server.xml
+    dest: /etc/tomcat8/web.xml
+  notify:
+  - restart-tomcat
+
+- name: copy tomcat8 to /etc/default/
+  copy:
+    src: ../files/tomcat8
+    dest: /etc/default/tomcat8
+  notify:
+  - restart-tomcat
