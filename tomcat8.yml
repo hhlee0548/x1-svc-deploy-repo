@@ -1,4 +1,0 @@
-- hosts: was
-  become: true
-  roles:
-  - tomcat8

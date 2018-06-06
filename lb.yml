@@ -1,0 +1,5 @@
+- name: Deploy Keepalived
+  hosts: lb
+  become: true
+  roles:
+  - keepalived

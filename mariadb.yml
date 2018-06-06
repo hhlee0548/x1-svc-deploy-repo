@@ -1,5 +1,0 @@
----
-- hosts: mariadb
-  become: true
-  roles:
-  - mariadb

@@ -1,5 +1,0 @@
-- hosts: apache-webservers
-  become: true
-  roles:
-  - webservers
-
