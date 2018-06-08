@@ -5,12 +5,12 @@
   tags:
   - install
 
-- name: config sysctl.conf
+- name: update sysctl.conf
   sysctl:
     name: net.ipv4.ip_nonlocal_bind
     value: 1
     state: present
-    reoload: yes
+    reload: yes
   tags:
   - install
 
