@@ -1,0 +1,17 @@
+- name: include vars
+  include_vars:
+    dir: vars
+    files_matching: install*
+    depth: 1
+  tags:
+  - install
+  - config
+
+- name: include vars
+  include_vars:
+    dir: vars
+    files_matching: install*
+    depth: 1
+  tags:
+  - remove
+

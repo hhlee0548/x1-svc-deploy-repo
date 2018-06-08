@@ -1,3 +1,5 @@
+- import_tasks: ../common/tasks/main.yml
+
 - name: install keepalived
   apt: pkg={{ item }} state=present
   with_items:
@@ -7,10 +9,13 @@
 
 - name: update sysctl.conf
   sysctl:
-    name: net.ipv4.ip_nonlocal_bind
-    value: 1
+    name: "{{ item.key }}"
+    value: "{{ item.value }}"
     state: present
     reload: yes
+  with_dict: "{{ sysctl_setting }}"
+  when:
+  - sysctl_setting is defined
   tags:
   - install
 
