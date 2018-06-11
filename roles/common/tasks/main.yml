@@ -10,8 +10,32 @@
 - name: include vars
   include_vars:
     dir: vars
-    files_matching: install*
+    files_matching: remove*
     depth: 1
   tags:
   - remove
 
+- name: update sysctl.conf
+  sysctl:
+    name: "{{ item.key }}"
+    value: "{{ item.value }}"
+    state: present
+    reload: yes
+  with_dict: "{{ sysctl_setting }}"
+  when:
+  - sysctl_setting is defined
+  tags:
+  - install
+
+- name: update limits.conf
+  pam_limits:
+    domain: "{{ item.split(' ')[0] }}"
+    limit_type: "{{ item.split(' ')[1] }}"
+    limit_item: "{{ item.split(' ')[2] }}"
+    value: "{{ item.split(' ')[3] }}"
+  #debug: var=item
+  loop: "{{ limits_setting }}"
+  when:
+  - limits_setting is defined
+  tags:
+  - install

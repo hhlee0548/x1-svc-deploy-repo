@@ -7,18 +7,6 @@
   tags:
   - install
 
-- name: update sysctl.conf
-  sysctl:
-    name: "{{ item.key }}"
-    value: "{{ item.value }}"
-    state: present
-    reload: yes
-  with_dict: "{{ sysctl_setting }}"
-  when:
-  - sysctl_setting is defined
-  tags:
-  - install
-
 - name: config keepalived.conf
   template: 
     src: keepalived.conf.j2 
