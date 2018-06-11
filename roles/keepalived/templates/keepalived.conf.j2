@@ -1,5 +1,5 @@
-{% set node1 = groups["lb"][0:1] | join(" ") %}
-{% set node2 = groups["lb"][1:2] | join(" ") %}
+{% set node1 = groups["keepalived"][0:1] | join(" ") %}
+{% set node2 = groups["keepalived"][1:2] | join(" ") %}
 
 {% if inventory_hostname == node1 %}
 {%   set l_priority = 101 %}

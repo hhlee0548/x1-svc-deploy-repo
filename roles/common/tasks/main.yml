@@ -1,7 +1,7 @@
 - name: include vars
   include_vars:
     dir: vars
-    files_matching: install*
+    files_matching: (install*|common*)
     depth: 1
   tags:
   - install
@@ -10,7 +10,7 @@
 - name: include vars
   include_vars:
     dir: vars
-    files_matching: remove*
+    files_matching: (remove*|common*)
     depth: 1
   tags:
   - remove
@@ -26,6 +26,7 @@
   - sysctl_setting is defined
   tags:
   - install
+  - remove
 
 - name: update limits.conf
   pam_limits:
@@ -39,3 +40,4 @@
   - limits_setting is defined
   tags:
   - install
+  - remove

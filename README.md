@@ -19,8 +19,12 @@ EOF
 ```
 
 ## LB 배포
+- lb keepalived 설정
+  - keepalived-hosts
+  - roles/keepalived/vars/common.yml
+
 - lb keepalived 배포
 ```
-ansible-playbook lb.yml -i lb-hosts -e 'ansible_python_interpreter=/usr/bin/python3' -t install
+ansible-playbook keepalived.yml -i keepalived-hosts -e 'ansible_python_interpreter=/usr/bin/python3' --key-file=/tmp/lb.pem -t install
 ```
 
