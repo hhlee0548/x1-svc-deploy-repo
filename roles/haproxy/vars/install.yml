@@ -1,9 +1,9 @@
 limits_setting:
 # update file descriptors size
-  * soft nofile 10000000
-  * hard nofile 10000000
-  root soft nofile 10000000
-  root hard nofile 10000000
+  - "* soft nofile 10000000"
+  - "* hard nofile 10000000"
+  - root soft nofile 10000000
+  - root hard nofile 10000000
 
 sysctl_setting:
 # update file descriptors size

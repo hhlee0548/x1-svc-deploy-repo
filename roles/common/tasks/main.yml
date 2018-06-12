@@ -1,17 +1,11 @@
 - name: include vars
-  include_vars:
-    dir: vars
-    files_matching: (remove.yml|common.yml)
-    depth: 1
+  include_vars: vars/install.yml
   tags:
   - install
   - config
 
 - name: include vars
-  include_vars:
-    dir: vars
-    files_matching: (remove.yml|common.yml)
-    depth: 1
+  include_vars: vars/remove.yml
   tags:
   - remove
 
@@ -28,14 +22,18 @@
   - install
   - remove
 
+#- name: update limits.conf
+#  debug: var=limits_setting
+#  tags:
+#  - install
+
 - name: update limits.conf
   pam_limits:
     domain: "{{ item.split(' ')[0] }}"
     limit_type: "{{ item.split(' ')[1] }}"
     limit_item: "{{ item.split(' ')[2] }}"
     value: "{{ item.split(' ')[3] }}"
-  #debug: var=item
-  loop: "{{ limits_setting }}"
+  with_items: "{{ limits_setting }}"
   when:
   - limits_setting is defined
   tags:
