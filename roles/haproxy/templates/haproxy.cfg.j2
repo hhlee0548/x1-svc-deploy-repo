@@ -1,0 +1,83 @@
+global
+    log 127.0.0.1 local0 notice
+    user haproxy
+    group haproxy
+
+defaults
+    log global
+    retries 2
+    timeout connect 30000
+    timeout server 15m
+    timeout client 15m
+
+listen monitor
+    bind *:8880
+    mode            http
+    log             global
+    maxconn 10
+    timeout client      100s
+    timeout server      100s
+    timeout connect      100s
+    timeout queue   100s
+    stats enable
+    stats hide-version
+    stats refresh 30s
+    stats show-node
+{% if monitor is defined %}
+    stats auth admin:{{ monitor.haproxy_passwd }}
+{% else %}
+    stats auth admin:admin
+{% endif %}
+    stats uri  /haproxy?stats
+
+
+{% if mariadbs is defined %}
+{% for name, v in mariadbs.items() %}
+listen {{ name }}
+    bind *:{{ v.source_port }}
+    balance source
+    mode tcp
+    option tcpka
+{%   if v.check_user is defined %}
+    option mysql-check user {{ v.check_user }}
+{%   else %}
+    option tcp-check
+    tcp-check expect string is\ running.
+{%   endif %}
+{%   for ip in v.target_ips %}
+    server mysql-{{ loop.index }} {{ ip }}:{{ v.target_port }} check inter {{ v.check_inter | default("5s") }}
+{%   endfor %}
+{% endfor %}
+{% endif %}
+
+
+{% if redises is defined %}
+{% for name, v in redises.items() %}
+listen {{ name }}
+    bind *:{{ v.source_port }}
+    option tcp-check
+    tcp-check connect
+    tcp-check send PING\r\n
+    tcp-check expect string +PONG
+    tcp-check send info\ replication\r\n
+    tcp-check expect string role:master
+    tcp-check send QUIT\r\n
+    tcp-check expect string +OK
+{%   for ip in v.target_ips %}
+    server redis_{{ loop.index }} {{ ip }}:{{ v.target_port }} check inter {{ v.check_inter | default("5s") }}
+{%   endfor %}
+{% endfor %}
+{% endif %}
+
+
+{% if apps is defined %}
+{% for name, v in apps.items() %}
+listen {{ name }}
+    bind *:{{ v.source_port }}
+    mode http
+    monitor-uri   {{ v.monitor_uri }}
+{%   for ip in v.target_ips %}
+    server app_{{ loop.index }} {{ ip }}:{{ v.target_port }} check inter {{ v.check_inter | default("5s") }}
+{%   endfor %}
+{% endfor %}
+{% endif %}

@@ -1,0 +1,24 @@
+- import_tasks: ../common/tasks/main.yml
+
+- name: install haproxy
+  apt: pkg={{ item }} state=present
+  with_items:
+  - haproxy
+  tags:
+  - install
+
+- name: config haproxy.cfg
+  template: 
+    src: haproxy.cfg.j2 
+    dest: /etc/haproxy/haproxy.cfg
+  notify: restart-haproxy
+  tags:
+  - install
+  - config
+
+- name: remove haproxy
+  apt: pkg={{ item }} state=absent purge=true
+  with_items:
+  - haproxy
+  tags:
+  - remove

@@ -1,0 +1,6 @@
+- name: Deploy Haproxy
+  hosts: haproxy
+  become: true
+  roles:
+  - haproxy
+

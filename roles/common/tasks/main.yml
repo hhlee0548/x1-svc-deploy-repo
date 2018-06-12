@@ -1,7 +1,7 @@
 - name: include vars
   include_vars:
     dir: vars
-    files_matching: (install*|common*)
+    files_matching: (remove.yml|common.yml)
     depth: 1
   tags:
   - install
@@ -10,7 +10,7 @@
 - name: include vars
   include_vars:
     dir: vars
-    files_matching: (remove*|common*)
+    files_matching: (remove.yml|common.yml)
     depth: 1
   tags:
   - remove
