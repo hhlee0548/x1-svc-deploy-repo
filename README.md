@@ -25,6 +25,20 @@ EOF
 
 - lb keepalived 배포
 ```
-ansible-playbook keepalived.yml -i keepalived-hosts -e 'ansible_python_interpreter=/usr/bin/python3' --key-file=/tmp/lb.pem -t install
+ansible-playbook keepalived.yml \
+                 -i keepalived-hosts \
+                 -e 'ansible_python_interpreter=/usr/bin/python3' \
+                 --key-file=/tmp/lb.pem -t install
 ```
 
+- lb haproxy 설정
+  - haproxy-hosts
+  - roles/haproxy/vars/common.yml
+
+- lb haproxy 배포
+```
+ansible-playbook haproxy.yml \
+               -i haproxy-hosts \
+               -e 'ansible_python_interpreter=/usr/bin/python3' \
+               --key-file=/tmp/lb.pem -t install
+```
