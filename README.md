@@ -32,6 +32,10 @@ EOF
 - roles : ansible role 정의 파일
 
 ## LB 배포
+- OpenSSL 인증서 생성
+```
+bin/cert.sh
+```
 - lb 배포
 ```
 bin/lb.sh
