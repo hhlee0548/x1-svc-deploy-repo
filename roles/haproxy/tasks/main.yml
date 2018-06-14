@@ -17,7 +17,7 @@
 
 - name: copy certificate to remote hosts
   copy:
-    src: /etc/ssl/crt/{{ item.key }}.one
+    src: "{{ item.value.ssl_cert_file }}"    
     dest: /etc/haproxy/cert/{{ item.key }}.one
     owner: haproxy
     group: haproxy
