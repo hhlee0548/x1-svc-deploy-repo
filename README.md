@@ -17,33 +17,28 @@ EOF
 ```
 . install.sh
 ```
+## 디렉토리 구성
+- bin: 배포 실행 파일
+  - lb.sh: keepalived & haproxy 배포
+  - keepalived.sh: keepalived 배포 (vip 서비스 제공)
+  - haproxy.sh: port forwarding 서비스 (Software LB 역할)
+- vars : 배포시 설정 파일
+  - */hosts : 호스트명 및 IP
+  - */common.yml : 서비스 설정
+- roles : ansible role 정의 파일
 
 ## LB 배포
-- lb keepalived 설정
-  - (호스트 정의 파일 사례) keepalived-hosts 
-  - (파라미터 설정 파일 사례) roles/keepalived/vars/common.yml 
-- lb keepalived 배포
-  - 호스트 파일은 임시 파일로 처리: /tmp/hosts-xxx
-  - 파라미터 파일은 임시 파일로 처리: /tmp/common-xxx
+- lb 배포
 ```
-ansible-playbook keepalived.yml \
-                 -i /tmp/hosts-xxx  \
-                 -e 'ansible_python_interpreter=/usr/bin/python3' \
-                 --key-file=/tmp/lb.pem \
-                 --extra-vars @/tmp/common-xxx  \
-                 -t install
+bin/lb.sh
 ```
-
-- lb haproxy 설정
-  - haproxy-hosts
-  - roles/haproxy/vars/common.yml
-
-- lb haproxy 배포
+- bin/lb.sh 
+  - hosts, lb.pem, common.yml 설정은 실 배포 환경에 맞게 재 지정하여 사용
 ```
-ansible-playbook haproxy.yml \
-                 -i haproxy-hosts \
-                 -e 'ansible_python_interpreter=/usr/bin/python3' \
-                 --key-file=/tmp/lb.pem \
-                 --extra-vars @roles/haproxy/vars/common.yml  \
-                 -t install
+ansible-playbook ../lb.yml \
+  -e 'ansible_python_interpreter=/usr/bin/python3' \
+  -i ../vars/lb/hosts \
+  --key-file=/tmp/lb.pem \
+  --extra-vars @../vars/lb/common.yml \
+  -t install
 ```
