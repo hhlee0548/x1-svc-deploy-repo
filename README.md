@@ -32,6 +32,14 @@ EOF
 - roles : ansible role 정의 파일
 
 ## LB 배포
+- 인증서 등록
+  - 사용자 인증서 등록 시 사전 조치
+    - ansible controller 의 /etc/ssl/crt/[web-app-name].one 위치에 파일을 등록
+    - 해당 파일은 private key > public key > parent public key 를 모두 포함
+  - OpenSSL 인증서 직접 생성 시에는 다음 명령을 실행
+```
+bin/cert.sh
+```
 - lb 배포
 ```
 bin/lb.sh
