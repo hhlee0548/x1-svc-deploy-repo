@@ -34,9 +34,10 @@ EOF
 ## LB 배포
 - 인증서 등록
   - 사용자 인증서 등록 시 사전 조치
-    - ansible controller 의 /etc/ssl/crt/[web-app-name].one 위치에 파일을 등록
-    - 해당 파일은 private key > public key > parent public key 를 모두 포함
+    - ansible controller 의 임의 위치에 인증서 파일을 등록
+    - 인증서 파일은 private key > public key > parent public key 를 모두 포함
   - OpenSSL 인증서 직접 생성 시에는 다음 명령을 실행
+    - 실행후 /etc/ssl/crt/[web-app-name].one 위치에 haproxy 용 파일이 생성
 ```
 bin/cert.sh
 ```
