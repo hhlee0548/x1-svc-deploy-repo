@@ -1,8 +1,10 @@
+## Keepalived 설정
 router_id: 10
 virtual_ipaddress: "192.168.10.201"
 
-#monitor:
-#  haproxy_passwd: haproxy
+## Haproxy 설정
+monitor:
+  haproxy_passwd: haproxy
 
 mariadbs:
   mariadb-xyz:
