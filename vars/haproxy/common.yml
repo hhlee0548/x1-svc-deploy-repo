@@ -16,6 +16,20 @@ webs:
     balance: roundrobin # default: source
     check_inter: 5s
 
+  web-yyy:
+    ssl_cert_type: user_input
+    ssl_cert_file: /etc/ssl/crt/web-yyy.one # user inserted cert file is put
+    ssl_source_port: 443 # default: 443
+    source_port: 80
+    target_port: 80
+    target_ips:
+      - 172.19.2.2
+      - 172.19.2.10
+      - 172.19.2.13
+    balance: roundrobin # default: source
+    check_inter: 5s
+
+
 
 mariadbs:
   mariadb-xyz:
