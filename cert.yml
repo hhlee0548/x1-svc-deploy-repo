@@ -1,0 +1,14 @@
+#- name: Gen
+#  hosts: 127.0.0.1
+#  tasks:
+#  - command: python -c "import OpenSSL; print OpenSSL.__version__"
+#  tags:
+#  - cert
+
+- name: Generate Certificates
+  hosts: 127.0.0.1
+  connection: local
+  become: true
+  roles:
+  - cert
+

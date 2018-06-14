@@ -1,0 +1,42 @@
+{% set node1 = groups["keepalived"][0:1] | join(" ") %}
+{% set node2 = groups["keepalived"][1:2] | join(" ") %}
+
+{% if inventory_hostname == node1 %}
+{%   set l_priority = 101 %}
+{%   set l_peer_ipaddress = hostvars[node2]['ansible_host']  %}
+{% else %}
+{%   set l_priority = 100 %}
+{%   set l_peer_ipaddress = hostvars[node1]['ansible_host']  %}
+{% endif %}
+
+global_defs {
+    router_id {{ inventory_hostname }}
+}
+
+# Define the script used to check if haproxy is still working
+vrrp_script chk_haproxy {
+    script "killall -0 haproxy"
+    interval 2
+    fall 2       # require 2 failures for KO
+    rise 2       # require 2 successes for OK
+}
+
+# Configuration for the virtual interface
+vrrp_instance VIS_1 {
+    virtual_router_id	        {{ router_id }}
+    priority			{{ l_priority }}
+    interface                   {{ ansible_default_ipv4.interface }}
+    state		        MASTER
+    advert_int			1
+
+    unicast_peer {
+        {{ l_peer_ipaddress }}
+    }
+    virtual_ipaddress {
+        {{ virtual_ipaddress }}
+    }
+
+    track_script {
+	chk_haproxy
+    }
+}

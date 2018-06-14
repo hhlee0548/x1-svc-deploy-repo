@@ -31,6 +31,25 @@ listen monitor
     stats uri  /haproxy?stats
 
 
+{% if webs is defined %}
+{% for name, v in webs.items() %}
+listen {{ name }}
+    bind *:{{ v.source_port }}
+{%   if v.ssl_cert_type is defined %}	
+    bind *:{{ v.ssl_source_port | default("433") }} ssl crt /etc/haproxy/cert/{{ name }}.one
+    reqadd X-Forwarded-Proto:\ https	
+{%   endif %}	
+    option forwardfor
+    option httplog
+    mode http
+    balance {{ v.balance | default ("source") }}
+{%   for ip in v.target_ips %}
+    server app_{{ loop.index }} {{ ip }}:{{ v.target_port }} check inter {{ v.check_inter | default("5s") }}
+{%   endfor %}	
+{% endfor %}
+{% endif %}
+
+
 {% if mariadbs is defined %}
 {% for name, v in mariadbs.items() %}
 listen {{ name }}

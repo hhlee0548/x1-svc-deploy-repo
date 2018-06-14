@@ -7,6 +7,27 @@
   tags:
   - install
 
+- name: Ensure directory exists for ssl
+  file:
+    path: /etc/haproxy/cert/
+    state: directory
+  tags:
+  - install
+  - cert
+
+- name: copy certificate to remote hosts
+  copy:
+    src: /etc/ssl/crt/{{ item.key }}.one
+    dest: /etc/haproxy/cert/{{ item.key }}.one
+    owner: haproxy
+    group: haproxy
+    mode: 0644
+    backup: yes
+  with_dict: "{{ webs }}"
+  tags:
+  - install
+  - cert
+
 - name: config haproxy.cfg
   template: 
     src: haproxy.cfg.j2 

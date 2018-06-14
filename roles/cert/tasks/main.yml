@@ -1,0 +1,72 @@
+- name: Ensure python OpenSSL dependencies are installed.
+  pip:
+    name: pyOpenSSL
+    state: present
+  tags:
+  - install
+  - cert
+
+- name: Ensure directory exists for local self-signed TLS certs.
+  file:
+    path: /etc/ssl/crt/
+    state: directory
+  tags:
+  - install
+  - cert
+
+- name: Generate an OpenSSL private key
+  openssl_privatekey:
+    path: /etc/ssl/crt/{{ item.key }}.pem
+  with_dict: "{{ webs }}"
+  when: item.value.ssl_cert_type == "self"
+  tags:
+  - install
+  - cert
+
+- name: Generate an OpenSSL CSR
+  openssl_csr:
+    path: /etc/ssl/crt/{{ item.key }}.csr
+    privatekey_path: /etc/ssl/crt/{{ item.key }}.pem
+    common_name: "{{ item.value.ssl_cert_common_name }}"
+  with_dict: "{{ webs }}"
+  when: item.value.ssl_cert_type == "self"
+  tags:
+  - install
+  - cert
+
+- name: Generate an OpenSSL certificate
+  openssl_certificate:
+    privatekey_path: /etc/ssl/crt/{{ item.key }}.pem
+    csr_path: /etc/ssl/crt/{{ item.key }}.csr
+    path: /etc/ssl/crt/{{ item.key }}.crt
+    provider: selfsigned
+  with_dict: "{{ webs }}"
+  when: item.value.ssl_cert_type == "self"
+  tags:
+  - install
+  - cert
+
+- name: Generate a haproxy certificate 
+  assemble:
+    src: /etc/ssl/crt/
+    dest: /etc/ssl/crt/{{ item.key }}.one
+    regexp: "{{ item.key }}.(pem|crt)"
+  with_dict: "{{ webs }}"
+  when: item.value.ssl_cert_type == "self"
+  tags:
+  - install
+  - cert
+
+- name: Generate a Let's Encrypt Certificate
+  openssl_certificate:
+    path: /etc/ssl/crt/{{ item.key }}.crt
+    csr_path: /etc/ssl/crt/{{ item.key }}.csr
+    provider: acme
+    acme_accountkey: /etc/ssl/crt/{{ item.key }}.pem
+    acme_challenge_path: /etc/ssl/crt/{{ item.key }}/
+    force: True
+  with_dict: "{{ webs }}"
+  when: item.value.ssl_cert_type == "acme"
+  tags:
+  - install
+  - cert
