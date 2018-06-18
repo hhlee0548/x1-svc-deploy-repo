@@ -4,7 +4,7 @@
 - 서비스 명 단위로 생성 : www.kpaata.cloud
 ```
 server {
-    listen 8080 default_server;  // 서비스 포트 
+    listen 8080 default_server;  // 서비스 포트 (default_server는 기본 서버에만 표시)
     client_max_body_size 100M;   // Client 파일 업로드 최대 파일 크기
 
     server_name kpaasta.cloud www.kpaasta.cloud  portal.kpaasta.cloud ;  // 서비스 도메인 지정
