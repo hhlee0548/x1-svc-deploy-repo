@@ -1,5 +1,6 @@
 # Nginx Web Server 설계
 
+
 ## 설정 conf
 - resource 의 location 규칙
   - location 값은 필수
@@ -7,6 +8,8 @@
   - proxy_pass 혹은 root/alias 중 하나 선택 가능
   - proxy_pass 선택 시 rewrite_expression 을 추가할 수 있음
     (rewrite_expression 값이 /xxx 로 시작되는 경우 기본값 "^/xxx/(.*)$ /$1 break" 옵션 생성) 
+- rosource 위치
+  - 기본 설정 기준 /home/ubuntu/nginx/default  
 ```
 servers:
   server-1:
@@ -19,7 +22,7 @@ servers:
     resources:
       location1:
         location: "/"
-        root: /home/ubuntu/nginx/portal
+        root: /home/ubuntu/nginx/default
         index: index.html index.htm
       location2:
         location: "/comm/"
@@ -39,7 +42,7 @@ servers:
     resources:
       location1:
         location: "/"
-        root: /home/ubuntu/nginx/portal2
+        root: /home/ubuntu/nginx/default
         index: index.html index.htm
 ```
 
