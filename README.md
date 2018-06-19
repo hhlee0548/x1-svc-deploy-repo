@@ -31,7 +31,16 @@ EOF
   - */common.yml : 서비스 설정
 - roles : ansible role 정의 파일
 
-## LB 배포
+## 공통 테그
+- roles 은 공용으로 다음의 테그 값을 제공
+  - install : 서비스 패키지 설치
+  - remove : 서비스 패키지 삭제
+  - config : 설정 업데이트 및 서비스 재시동
+  - start : 서비스 시작
+  - stop : 서비스 중지
+  - restart : 서비스 재시동
+  
+## 배포
 - 인증서 등록
   - 사용자 인증서 등록 시 사전 조치
     - ansible controller 의 임의 위치에 인증서 파일을 등록
@@ -55,3 +64,8 @@ ansible-playbook ../lb.yml \
   --extra-vars @../vars/lb/common.yml \
   -t install
 ```
+- Nginx 배포
+```
+bin/nginx.sh
+```
+
