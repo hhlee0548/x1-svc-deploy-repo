@@ -7,10 +7,10 @@
   tags:
   - install
 
-- name: config nginx.conf
-  template: 
-    src: nginx.conf.j2 
-    dest: /etc/nginx/nginx.conf 
+- name: config nginx.cfg
+  template:
+    src: default.j2
+    dest: /etc/nginx/sites-enabled/default
   notify: restart-nginx
   tags:
   - install
@@ -23,3 +23,17 @@
   tags:
   - remove
 
+- name: stop nginx
+  systemd: name=nginx state=stopped
+  tags:
+  - stop
+
+- name: start nginx
+  systemd: name=nginx state=started
+  tags:
+  - start
+
+- name: restart nginx
+  systemd: name=nginx state=restarted
+  tags:
+  - restart

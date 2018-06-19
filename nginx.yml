@@ -1,0 +1,6 @@
+- name: Deploy Nignx
+  hosts: nginx
+  become: true
+  roles:
+  - nginx
+

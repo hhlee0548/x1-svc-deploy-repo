@@ -1,0 +1,33 @@
+servers:
+  server-1:
+    listen: 8080 default_server
+    client_max_body_size: 100M
+    server_name: kpaasta.cloud www.kpaasta.cloud  portal.kpaasta.cloud
+    https_only_redirect: https://www.kpaasta.cloud
+    error_page_404: /404.html
+    error_page_50x: /50x.html
+    resources:
+      location1:
+        location: "/"
+        root: /home/ubuntu/nginx/portal
+        index: index.html index.htm
+      location2:
+        location: "/comm/"
+        alias: /home/ubuntu/nginx/comm/
+      location3:
+        location: "/comm-api/"
+        rewrite_expression:
+          - ^/comm-api/(.*)$ /$1 break
+        proxy_pass: http://www.kpaasta.cloud:4443
+      location4:
+        location: "~ \\.php$"
+        proxy_pass: http://www.kpaasta.cloud:4443
+
+  server-2:
+    listen: 8081
+    server_name: kpaasta2.cloud www.kpaasta2.cloud 
+    resources:
+      location1:
+        location: "/"
+        root: /home/ubuntu/nginx/portal2
+        index: index.html index.htm

@@ -43,3 +43,19 @@
   - haproxy
   tags:
   - remove
+
+
+- name: stop haproxy
+  systemd: name=haproxy state=stopped
+  tags:
+  - stop
+
+- name: start haproxy
+  systemd: name=haproxy state=started
+  tags:
+  - start
+
+- name: restart haproxy
+  systemd: name=haproxy state=restarted
+  tags:
+  - restart

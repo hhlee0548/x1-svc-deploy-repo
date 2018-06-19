@@ -23,3 +23,17 @@
   tags:
   - remove
 
+- name: stop keepalived
+  systemd: name=keepalived state=stopped
+  tags:
+  - stop
+
+- name: start keepalived
+  systemd: name=keepalived state=started
+  tags:
+  - start
+
+- name: restart keepalived
+  systemd: name=keepalived state=restarted
+  tags:
+  - restart
