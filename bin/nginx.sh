@@ -3,5 +3,5 @@ ansible-playbook ../nginx.yml \
   -i ../vars/nginx/hosts \
   --key-file=/tmp/lb.pem \
   --extra-vars @../vars/nginx/common.yml \
-  -t install \
-  -vv
+  -t install 
+#  -vv

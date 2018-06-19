@@ -9,7 +9,7 @@ servers:
     resources:
       location1:
         location: "/"
-        root: /home/ubuntu/nginx/portal
+        root: /home/ubuntu/nginx/default/
         index: index.html index.htm
       location2:
         location: "/comm/"
@@ -29,5 +29,5 @@ servers:
     resources:
       location1:
         location: "/"
-        root: /home/ubuntu/nginx/portal2
+        root: /home/ubuntu/nginx/default/
         index: index.html index.htm
