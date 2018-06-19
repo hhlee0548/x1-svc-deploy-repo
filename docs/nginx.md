@@ -1,13 +1,19 @@
 # Nginx Web Server 설계
 
 ## 설정 conf
+- resource 의 location 규칙
+  - location 값은 필수
+  - root 혹은 alias 중 하나 선택 가능
+  - proxy_pass 혹은 root/alias 중 하나 선택 가능
+  - proxy_pass 선택 시 rewrite_expression 을 추가할 수 있음
+    (rewrite_expression 값이 /xxx 로 시작되는 경우 기본값 "^/xxx/(.*)$ /$1 break" 옵션 생성) 
 ```
-domains:
-  www.kpaasta.cloud:
+servers:
+  server-1:
     listen: 8080 default_server
     client_max_body_size: 100M
     server_name: kpaasta.cloud www.kpaasta.cloud  portal.kpaasta.cloud
-    https_only: https://www.kpaasta.cloud
+    https_only_redirect: https://www.kpaasta.cloud
     error_page_404: /404.html
     error_page_50x: /50x.html
     resources:
@@ -21,22 +27,21 @@ domains:
       location3:
         location: "/comm-api/"
         rewrite_expression:
-          - ^/comm-api/(.*)$ /$1 break; // Rewrite optional
-        proxy_pass: http://portal_lb_vip:4443   // 타겟LB: Port   
+          - ^/comm-api/(.*)$ /$1 break
+        proxy_pass: http://www.kpaasta.cloud:4443
       location4:
-        location: "~ \.php$"
-        proxy_pass: http://portal_lb_vip:4443   // 타겟LB: Port     
+        location: "~ \\.php$"
+        proxy_pass: http://www.kpaasta.cloud:4443
 
-  www.kpaasta2.cloud:
+  server-2:
     listen: 8081
-    server_name: kpaasta2.cloud www.kpaasta2.cloud 
+    server_name: kpaasta2.cloud www.kpaasta2.cloud
     resources:
       location1:
         location: "/"
         root: /home/ubuntu/nginx/portal2
         index: index.html index.htm
 ```
-
 
 ## 배포 conf
 - 서비스 명 단위로 생성 : www.kpaata.cloud
@@ -77,4 +82,44 @@ server {
     error_page 404              /404.html; // Error page path (기본 Web 리소스 Path)
     error_page 500 502 503 504  /50x.html; // Error page path (기본 Web 리소스 Path)  
 }
-  ```
+```
+
+## Template
+```
+{% if servers is defined %}
+{% for name, v in servers.items() %}
+server {
+    listen {{ v.listen }};
+    client_max_body_size {{ v.client_max_body_size | default("10M") }};
+    server_name {{ v.server_name }};
+    error_page 404              {{ v.error_page_404 | default("/404.html") }};
+    error_page 500 502 503 504  {{ v.error_page_50x | default("/50x.html") }};
+
+{%  if v.https_only_redirect is defined %}
+    if ($http_x_forwarded_proto != 'https') {
+       return 301 {{ v.https_only_redirect }};
+    }
+{%  endif %}
+
+{%   if v.resources is defined %}
+{%   for loc, lv in v.resources.items() %}
+    location {{ lv.location }} {
+{%     for exp in lv.rewrite_expression | default({}) %}
+        rewrite {{ exp }};
+{%     endfor -%}
+{%     if lv.proxy_pass is defined %}
+        proxy_pass {{ lv.proxy_pass }};
+{%     endif -%}
+{%     if lv.root is defined %}
+        root {{ lv.root }};
+{%     endif -%}
+{%     if lv.alias is defined %}
+        root {{ lv.alias }};
+{%     endif -%}
+     }
+{%  endfor %}
+{%  endif %}
+}
+{% endfor %}
+{% endif %}
+```
