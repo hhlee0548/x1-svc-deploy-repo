@@ -64,7 +64,7 @@ ansible-playbook ../lb.yml \
   --extra-vars @../vars/lb/common.yml \
   -t install
 ```
-- Nginx 배포
+- [Nginx 배포](docs/nginx.md)
 ```
 bin/nginx.sh
 ```
