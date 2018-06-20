@@ -1,0 +1,31 @@
+# Systemd unit file for tomcat
+[Unit]
+Description=Apache Tomcat Web Application Container
+After=syslog.target network.target
+
+[Service]
+Type=forking
+
+{% if tomcat_version == "openjdk-8-jdk" %}
+Environment=JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64/
+{% elif tomcat_version == "openjdk-7-jdk"  %}
+Environment=JAVA_HOME=/usr/lib/jvm/java-7-openjdk-amd64/
+{% endif %}
+Environment='JAVA_OPTS=-Djava.awt.headless=true -Djava.security.egd=file:/dev/./urandom'
+Environment=CATALINA_PID=/usr/local/tomcat/{{ tomcat_version }}/run/tomcat.pid
+Environment=CATALINA_HOME=/usr/local/tomcat/{{ tomcat_version }}
+Environment=CATALINA_BASE=/usr/local/tomcat/{{ tomcat_version }}
+Environment='CATALINA_OPTS=-Xms{{ tomcat_memory_ms | default("512M") }} -Xmx{{ tomcat_memory_mx | default("1024M") }} -server -XX:+UseParallelGC'
+
+ExecStart=/usr/local/tomcat/{{ tomcat_version }}/bin/startup.sh
+ExecStop=/usr/local/tomcat/{{ tomcat_version }}/bin/shutdown.sh
+
+User=tomcat
+Group=tomcat
+UMask=0007
+RestartSec=10
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+

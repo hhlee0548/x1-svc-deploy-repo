@@ -1,0 +1,123 @@
+- import_tasks: ../common/tasks/main.yml
+
+- name: install openjdk
+  apt: pkg={{ java_package }} state=present
+  tags:
+  - install
+
+#- name: install tomcat
+#  apt: pkg={{ item }} state=latest
+#  with_items:
+#    - tomcat7
+#  tags:
+#  - install
+
+- name: download tomcat
+  get_url: url={{ tomcat_download_url }} dest=/tmp/{{ tomcat_version }}.tar.gz
+  tags:
+  - install
+
+- name: create tomcat directory 
+  file:
+    path: /usr/local/tomcat/{{ tomcat_version }}
+    state: directory
+  tags:
+  - install
+
+- name: extract archive
+  unarchive:
+    copy: no
+    src: /tmp/{{ tomcat_version }}.tar.gz
+    dest: /usr/local/tomcat/{{ tomcat_version }}
+    extra_opts: [--strip-components=1]
+  tags:
+  - install
+
+
+- name: add group "tomcat"
+  group: name=tomcat
+  tags:
+  - install
+
+- name: add user "tomcat"
+  user: name=tomcat group=tomcat home=/usr/local/tomcat createhome=no
+  tags:
+  - install
+
+
+- name: set tomcat directory permissions
+  file: path=/usr/local/tomcat/{{ tomcat_version }} owner=tomcat group=tomcat state=directory recurse=yes
+  tags:
+  - install
+
+#- name: install tomcat init script
+#  copy: src=tomcat-initscript.sh dest=/etc/init.d/tomcat mode=0755
+#  tags:
+#  - install
+
+- name: install tomcat init script
+  template: 
+    src: tomcat.service.j2
+    dest: /etc/systemd/system/tomcat.service 
+  tags:
+  - install
+
+- name: enable tomcat service 
+  become: true
+  systemd:
+    daemon_reload: yes
+    name: tomcat
+    enabled: yes
+  tags:
+  - install
+
+- name: config tomcat server
+  template: 
+    src: server.xml.j2
+    dest: /usr/local/tomcat/{{ tomcat_version }}/conf/server.xml
+  notify: restart-tomcat
+  tags:
+  - install
+  - config
+
+- name: config tomcat user
+  template: 
+    src: tomcat-users.xml.j2
+    dest: /usr/local/tomcat/{{ tomcat_version }}/conf/tomcat-users.xml
+  notify: restart-tomcat
+  tags:
+  - install
+  - config
+
+- name: remove tomcat
+  file: path=/usr/local/tomcat/{{ tomcat_version }} state=absent
+  tags:
+  - remove
+
+- name: remove tomcat user
+  user: name=tomcat state=absent
+  tags:
+  - remove
+
+- name: remove tomcat group
+  group: name=tomcat state=absent
+  tags:
+  - remove
+
+- name: stop tomcat
+  become: true
+  systemd: name=tomcat state=stopped 
+  tags:
+  - stop
+
+- name: start tomcat
+  become: true
+  systemd: name=tomcat state=started
+  tags:
+  - start
+
+- name: restart tomcat
+  become: true
+  systemd: name=tomcat state=restarted
+  tags:
+  - restart

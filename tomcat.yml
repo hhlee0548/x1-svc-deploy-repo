@@ -1,0 +1,6 @@
+- name: Deploy Tomcat
+  hosts: tomcat
+  become: true
+  roles:
+  - tomcat
+
