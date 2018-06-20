@@ -4,6 +4,10 @@
   apt: pkg={{ item }} state=present
   with_items:
   - nginx
+  register: apt_status
+  until: apt_status|success
+  delay: 6
+  retries: 10
   tags:
   - install
 
