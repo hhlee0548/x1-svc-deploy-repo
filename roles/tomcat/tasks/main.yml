@@ -2,6 +2,10 @@
 
 - name: install openjdk
   apt: pkg={{ java_package }} state=present
+  register: apt_status
+  until: apt_status|success
+  delay: 6
+  retries: 10
   tags:
   - install
 
