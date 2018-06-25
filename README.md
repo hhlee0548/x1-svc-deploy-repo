@@ -2,24 +2,9 @@
 Ansible Repository for Service Deployment
 
 ## Ansible Controller 환경 구성
-- 배포 실행 파일 생성
-```
-cat << EOF >> install.sh
-#!/bin/bash
-sudo apt-get update
-sudo apt-get install software-properties-common
-sudo apt-add-repository ppa:ansible/ansible
-sudo apt-get update
-sudo apt-get install ansible
-
-sudo apt-get install python3-pip
-sudo pip3 install --upgrade pip
-sudo pip3 install pyopenssl
-EOF
-```
 - 배포 실행 
 ```
-. install.sh
+bin/install.sh
 ```
 ## 디렉토리 구성
 - bin: 배포 실행 파일
@@ -57,11 +42,11 @@ bin/lb.sh
 - bin/lb.sh 
   - hosts, lb.pem, common.yml 설정은 실 배포 환경에 맞게 재 지정하여 사용
 ```
-ansible-playbook ../lb.yml \
+ansible-playbook lb.yml \
   -e 'ansible_python_interpreter=/usr/bin/python3' \
-  -i ../vars/lb/hosts \
-  --key-file=/tmp/lb.pem \
-  --extra-vars @../vars/lb/common.yml \
+  -i vars/lb/hosts \
+  --key-file=~/.ssh/id_rsa \
+  --extra-vars @vars/lb/common.yml \
   -t install
 ```
 - [Nginx 배포](docs/nginx.md)
