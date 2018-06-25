@@ -1,7 +1,7 @@
-ansible-playbook ../nginx.yml \
+ansible-playbook nginx.yml \
   -e 'ansible_python_interpreter=/usr/bin/python3' \
-  -i ../vars/nginx/hosts \
-  --key-file=/tmp/lb.pem \
-  --extra-vars @../vars/nginx/common.yml \
+  --key-file=~/.ssh/id_rsa \
+  -i vars/nginx/hosts \
+  --extra-vars @vars/nginx/common.yml \
   -t install 
 #  -vv

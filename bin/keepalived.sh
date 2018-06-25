@@ -1,6 +1,6 @@
-ansible-playbook ../keepalived.yml \
+ansible-playbook keepalived.yml \
   -e 'ansible_python_interpreter=/usr/bin/python3' \
-  -i ../vars/keepalived/hosts \
-  --key-file=/tmp/lb.pem \
-  --extra-vars @../vars/keepalived/common.yml \
+  --key-file=~/.ssh/id_rsa \
+  -i vars/keepalived/hosts \
+  --extra-vars @vars/keepalived/common.yml \
   -t install
