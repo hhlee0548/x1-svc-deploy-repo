@@ -53,4 +53,12 @@ ansible-playbook lb.yml \
 ```
 bin/nginx.sh
 ```
+- [Tomcat 배포]
+```
+bin/tomcat.sh
+```
+- [Mariadb 배포]
+```
+bin/mariadb.sh [ install | remove | start | stop | restart | status ]
+```
 
