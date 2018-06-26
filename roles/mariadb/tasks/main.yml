@@ -26,6 +26,10 @@
     state: "{{ item.state }}"
     force: yes
   with_items: "{{ _apt }}"
+  register: apt_status
+  until: apt_status|success
+  delay: 6
+  retries: 10
   notify: restart-mysql
   tags: install
 
