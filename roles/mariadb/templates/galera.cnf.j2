@@ -1,0 +1,15 @@
+[mysqld]
+binlog_format=ROW
+default-storage-engine=innodb
+innodb_autoinc_lock_mode=2
+query_cache_size=0
+query_cache_type=0
+bind-address=0.0.0.0
+
+wsrep_provider=/usr/lib/galera/libgalera_smm.so
+wsrep_cluster_name="{{ cluster_name }}"
+wsrep_cluster_address="gcomm://{% for host in groups['mariadb'] %}{{ hostvars[host].ansible_host }},{% endfor %}"
+wsrep_sst_method=rsync
+
+wsrep_node_address="{{ ansible_default_ipv4.address }}"
+wsrep_node_name="{{ ansible_hostname }}"

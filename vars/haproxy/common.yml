@@ -33,7 +33,7 @@ webs:
 
 mariadbs:
   mariadb-xyz:
-    source_port: 3306
+    source_port: 13306
     target_port: 3306
     target_ips: 
     - 192.168.10.4
@@ -44,7 +44,7 @@ mariadbs:
 
 redises:
   redis-xyz:
-    source_port: 6379
+    source_port: 16379
     target_port: 6379
     target_ips: 
     - 192.168.10.4
@@ -54,7 +54,7 @@ redises:
 
 apps:
   comm:
-    source_port: 4443
+    source_port: 14443
     target_port: 4443
     target_ips: 
     - 192.168.10.4
@@ -64,7 +64,7 @@ apps:
     check_inter: 3s
 
   api:
-    source_port: 4444
+    source_port: 14444
     target_port: 4444
     target_ips:
     - 192.168.10.4

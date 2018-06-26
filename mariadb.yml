@@ -1,0 +1,6 @@
+- name: Deploy Mariadb Cluster
+  hosts: mariadb
+  become: true
+  roles:
+  - mariadb
+

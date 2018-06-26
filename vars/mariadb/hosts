@@ -1,0 +1,4 @@
+[mariadb]
+mariadb1 ansible_host=192.168.10.4
+mariadb2 ansible_host=192.168.10.6
+mariadb3 ansible_host=192.168.10.10

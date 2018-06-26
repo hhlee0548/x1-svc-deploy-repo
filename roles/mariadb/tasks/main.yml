@@ -1,0 +1,202 @@
+- import_tasks: ../common/tasks/main.yml
+
+- name: include release specific variables
+  include_vars: "{{ ansible_distribution_release }}.yml"
+  tags: [install, remove]
+
+- name: apt-key add
+  apt_key:
+    id: "{{ item.id | default(None) or omit }}"
+    keyserver: "{{ item.keyserver | default(None) or omit }}"
+    url: "{{ item.url | default(None) or omit }}"
+    state: "{{ item.state }}"
+  with_items: "{{ _apt_key }}"
+  tags: install
+
+- name: apt-add-repository
+  apt_repository:
+    repo: "{{ item.repo }}"
+    state: "{{ item.state }}"
+  with_items: "{{ _apt_repository }}"
+  tags: install
+
+- name: apt-get install
+  apt:
+    name: "{{ item.name }}"
+    state: "{{ item.state }}"
+    force: yes
+  with_items: "{{ _apt }}"
+  notify: restart-mysql
+  tags: install
+
+- name: create required mysql directories
+  file: path={{ item }} state=directory owner=mysql group=mysql
+  with_items:
+    - /etc/mysql/conf.d
+    - /var/log/mysql
+  tags:
+    - install
+
+- name: copy templates
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+  with_items:
+    #- { src: "galera.cnf.j2", dest: "/etc/mysql/conf.d/galera.cnf" }
+    - { src: "mariadb.cnf.j2", dest: "/etc/mysql/conf.d/mariadb.cnf" }
+    - { src: "my.cnf.j2", dest: "/etc/mysql/my.cnf" }
+  tags:
+  - install
+  - config
+  - start
+  - restart
+
+- name: start service
+  service:
+    name: "{{ item.name }}"
+    state: "{{ item.state }}"
+  with_items:
+    - { name: "mysql", state: "started" }
+  register: start_service_result
+  ignore_errors: yes
+  tags: install
+
+#- name: debug
+#  debug:
+#    var: start_service_result
+#  tags: install
+
+- name: remove root .my.cnf
+  file: path=/root/.my.cnf state=absent
+  tags: install
+
+- name: disable mysql anonymous access
+  shell: mysql -NBe "DELETE FROM mysql.user WHERE User = ''"
+  when:
+    - start_service_result.results[0].state == "started"
+  register: disable_anonymous_access_result
+  changed_when: disable_anonymous_access_result.rc != 0
+  ignore_errors: yes
+  tags: install
+
+- name: setup mysql root password
+  shell: mysql -NBe "SET PASSWORD FOR 'root'@'localhost' = PASSWORD('{{ mysql_root_pass }}')"
+  when:
+    - start_service_result.results[0].state == "started"
+    - mysql_root_pass is string
+  register: setup_root_password_result
+  changed_when: setup_root_password_result.rc != 0
+  ignore_errors: yes
+  tags: install
+
+- name: copy templates
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: "{{ item.owner }}"
+    group: "{{ item.group }}"
+    mode: "{{ item.mode }}"
+  with_items:
+    - { src: ".my.cnf.j2", dest: "/root/.my.cnf",  owner: "root", group: "root", mode: "0600" }
+  when:
+    - start_service_result.results[0].state == "started"
+    - mysql_root_pass is string
+    - setup_root_password_result.rc == 0
+  ignore_errors: yes
+  tags: install
+
+- name: config bootstrap cluster
+  lineinfile: dest=/etc/mysql/my.cnf regexp="^wsrep_cluster_address = \"gcomm://" line="wsrep_cluster_address = \"gcomm://\"" state=present backrefs=yes
+  when: hostvars[mysql_master_node].ansible_host == ansible_host 
+  tags:
+  - install
+  - config
+  - start
+  - restart
+
+- name: stop mysql services
+  service: name=mysql state=stopped
+  tags:
+  - install
+  - config
+  - remove
+  - stop
+  - start
+  - restart
+
+- name: bootstrap mysql service
+  shell: service mysql start --wsrep-new-cluster
+  when: hostvars[mysql_master_node].ansible_host == ansible_host 
+  run_once: true
+  ignore_errors: yes
+  tags:
+  - install
+  - config
+  - start
+  - restart
+
+- name: start mysql in other nodes
+  service: name=mysql state=started 
+  when: hostvars[mysql_master_node].ansible_host != ansible_host 
+  tags:
+  - install
+  - config
+  - start
+  - restart
+
+- name: copy master templates
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+  with_items:
+    #- { src: "galera.cnf.j2", dest: "/etc/mysql/conf.d/galera.cnf" }
+    - { src: "mariadb.cnf.j2", dest: "/etc/mysql/conf.d/mariadb.cnf" }
+    - { src: "my.cnf.j2", dest: "/etc/mysql/my.cnf" }
+  when: hostvars[mysql_master_node].ansible_host == ansible_host 
+  tags:
+  - install
+  - config
+  - start
+  - restart
+
+- name: restart mysql on master node
+  service: name=mysql state=restarted
+  when: hostvars[mysql_master_node].ansible_host == ansible_host 
+  tags:
+  - install
+  - config
+  - start
+  - restart
+
+- name: check cluster size with command
+  shell: mysql -NBe "SHOW STATUS LIKE 'wsrep_cluster_size';"
+  register: cluster_size
+  tags:
+  - install
+  - config
+  - start
+  - restart
+  - status
+
+- name: display cluster size
+  debug: msg="{{ cluster_size.stdout }}"
+  tags:
+  - install
+  - config
+  - start
+  - restart
+  - status
+
+- name: remove mariadb
+  apt: pkg={{ item.name }} state=absent purge=true
+  with_items: "{{ _apt }}"
+  tags: remove
+
+- name: remove mariadb config
+  file: path=/etc/mysql state=absent
+  tags: remove
+
+- name: remove mariadb data
+  file: path=/var/lib/mysql state=absent
+  tags: remove
+
