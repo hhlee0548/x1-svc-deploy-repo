@@ -28,8 +28,8 @@
   with_items: "{{ _apt }}"
   register: apt_status
   until: apt_status|success
-  delay: 6
-  retries: 10
+  delay: 5
+  retries: 24
   notify: restart-mysql
   tags: install
 
