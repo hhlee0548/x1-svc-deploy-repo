@@ -1,4 +1,7 @@
 
+## objective
+- Add or remove system software monitoring configuration block in /etc/telegraf/telegraf.conf
+
 
 ## haproxy monitoring
 - 설정 가용
