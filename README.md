@@ -47,15 +47,19 @@ ansible-playbook lb.yml \
   -i vars/lb/hosts \
   --key-file=~/.ssh/id_rsa \
   --extra-vars @vars/lb/common.yml \
-  -t install
+  -t $*
+```
+- [LB 배포]
+```
+bin/lb.sh [ install | remove | start | stop | restart | status ]
 ```
 - [Nginx 배포](docs/nginx.md)
 ```
-bin/nginx.sh
+bin/nginx.sh [ install | remove | start | stop | restart | status ]
 ```
 - [Tomcat 배포]
 ```
-bin/tomcat.sh
+bin/tomcat.sh [ install | remove | start | stop | restart | status ]
 ```
 - [Mariadb 배포]
 ```
