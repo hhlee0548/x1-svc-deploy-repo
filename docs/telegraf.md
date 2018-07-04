@@ -3,6 +3,7 @@
 - Add or remove system software monitoring configuration block in /etc/telegraf/telegraf.conf
 
 
+## telegraf 
 ## haproxy monitoring
 - 설정 가용
 ```
@@ -36,9 +37,57 @@
 - 설정 적용
 ```
 [[inputs.haproxy]]
-{% if monitor is defined %}
-  servers = ["http://admin:{{ haproxy_passwd }}@myhaproxy.com:1936/haproxy?stats"]
-{% else %}
-  servers = ["http://admin:admin@myhaproxy.com:1936/haproxy?stats"]
-{% endif %}
+  servers = ["http://admin:{{ haproxy_passwd | default('admin') }}@myhaproxy.com:1936/haproxy?stats"]
+```
+## nginx monitoring
+- 설정 가용
+```
+# # Read Nginx's basic status information (ngx_http_stub_status_module)
+# [[inputs.nginx]]
+#   # An array of Nginx stub_status URI to gather stats.
+#   urls = ["http://localhost/server_status"]
+#
+#   # TLS/SSL configuration
+#   ssl_ca = "/etc/telegraf/ca.pem"
+#   ssl_cert = "/etc/telegraf/cert.cer"
+#   ssl_key = "/etc/telegraf/key.key"
+#   insecure_skip_verify = false
+#
+#   # HTTP response timeout (default: 5s)
+#   response_timeout = "5s"
+```
+- 설정 적용
+```
+[[inputs.nginx]]
+urls = ["http://localhost/nginx_status","http://localhost:8080/nginx_status"]
+```
+
+## tomcat monitoring
+- 설정 가용
+```
+# # Gather metrics from the Tomcat server status page.
+# [[inputs.tomcat]]
+#   ## URL of the Tomcat server status
+#   # url = "http://127.0.0.1:8080/manager/status/all?XML=true"
+#
+#   ## HTTP Basic Auth Credentials
+#   # username = "tomcat"
+#   # password = "s3cret"
+#
+#   ## Request timeout
+#   # timeout = "5s"
+#
+#   ## Optional SSL Config
+#   # ssl_ca = "/etc/telegraf/ca.pem"
+#   # ssl_cert = "/etc/telegraf/cert.pem"
+#   # ssl_key = "/etc/telegraf/key.pem"
+#   ## Use SSL but skip chain & host verification
+#   # insecure_skip_verify = false
+```
+- 설정 적용
+```
+[[inputs.tomcat]]
+url = "http://127.0.0.1:8080/manager/status/all?XML=true"
+username = "tomcat"
+password = "s3cret"
 ```
