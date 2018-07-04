@@ -1,15 +1,33 @@
-- name: include vars
-  include_vars: vars/install.yml
+- name: common file exists
+  stat:
+    path: vars/install.yml
+  register: file_install
   tags:
   - install
   - config
 
-- name: include vars
-  include_vars: vars/remove.yml
+- name: common file exists
+  stat:
+    path: vars/remove.yml
+  register: file_remove
   tags:
   - remove
 
-- name: update sysctl.conf
+
+- name: common include vars
+  include_vars: vars/install.yml
+  when: file_install.stat.exists
+  tags:
+  - install
+  - config
+
+- name: common include vars
+  include_vars: vars/remove.yml
+  when: file_remove.stat.exists
+  tags:
+  - remove
+
+- name: common update sysctl.conf
   sysctl:
     name: "{{ item.key }}"
     value: "{{ item.value }}"
@@ -27,7 +45,7 @@
 #  tags:
 #  - install
 
-- name: update limits.conf
+- name: common update limits.conf
   pam_limits:
     domain: "{{ item.split(' ')[0] }}"
     limit_type: "{{ item.split(' ')[1] }}"
