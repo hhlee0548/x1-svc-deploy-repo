@@ -1,0 +1,7 @@
+# Assume telegraf is installed when telegraf_conf exist
+#
+- name: restart-telegraf
+  service: name=telegraf state=restarted
+  #when: telegraf_service_status.rc == 0
+  when: telegraf_conf.stat.exists
+

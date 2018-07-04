@@ -27,7 +27,7 @@
     force: yes
   with_items: "{{ _apt }}"
   register: apt_status
-  until: apt_status|success
+  until: apt_status is success
   delay: 5
   retries: 24
   notify: restart-mysql
@@ -81,6 +81,7 @@
   register: disable_anonymous_access_result
   changed_when: disable_anonymous_access_result.rc != 0
   ignore_errors: yes
+  run_once: true
   tags: install
 
 - name: setup mysql root password
@@ -91,6 +92,7 @@
   register: setup_root_password_result
   changed_when: setup_root_password_result.rc != 0
   ignore_errors: yes
+  run_once: true
   tags: install
 
 - name: copy templates
@@ -203,4 +205,29 @@
 - name: remove mariadb data
   file: path=/var/lib/mysql state=absent
   tags: remove
+
+
+- name: telegraf add mysql monitoring
+  ini_file:
+    path: /etc/telegraf/telegraf.conf
+    section: "[inputs.mysql]"
+    option: "{{ item.option }}"
+    value: "{{ item.value }}"
+    state: present
+  with_items:
+    - { option: "servers", value: ["root:{{ mysql_root_pass }}@tcp(localhost:3306)/?tls=false"] }
+  notify: restart-telegraf
+  when: telegraf_conf.stat.exists
+  tags:
+  - install
+  - config
+
+- name: telegraf remove mysql monitoring
+  ini_file:
+    path: /etc/telegraf/telegraf.conf
+    section: "[inputs.mysql]"
+    state: absent
+  when: telegraf_conf.stat.exists
+  tags:
+  - remove
 

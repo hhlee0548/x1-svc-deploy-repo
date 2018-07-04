@@ -7,6 +7,13 @@ server {
     error_page 404              {{ v.error_page_404 | default("/404.html") }};
     error_page 500 502 503 504  {{ v.error_page_50x | default("/50x.html") }}; 
 
+    location /nginx_status {
+        stub_status on;
+        access_log   off;
+        allow localhost; 
+        deny all;
+    }
+
 {%  if v.https_only_redirect is defined %}
     if ($http_x_forwarded_proto != 'https') {
        return 301 {{ v.https_only_redirect }};

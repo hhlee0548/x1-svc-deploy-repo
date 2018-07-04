@@ -1,0 +1,6 @@
+- name: Deploy Telegraf
+  hosts: telegraf
+  become: true
+  roles:
+  - telegraf
+

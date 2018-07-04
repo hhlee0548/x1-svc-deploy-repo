@@ -57,3 +57,12 @@
   tags:
   - install
   - remove
+
+- name: common check if telegraf is installed 
+  stat:
+    path: /etc/telegraf/telegraf.conf
+  register: telegraf_conf
+  tags:
+  - install
+  - config
+  - remove

@@ -1,0 +1,542 @@
+# Telegraf Configuration
+#
+# Telegraf is entirely plugin driven. All metrics are gathered from the
+# declared inputs, and sent to the declared outputs.
+#
+# Plugins must be declared in here to be active.
+# To deactivate a plugin, comment out the name and any variables.
+#
+# Use 'telegraf -config telegraf.conf -test' to see what metrics a config
+# file would generate.
+#
+# Environment variables can be used anywhere in this config file, simply prepend
+# them with $. For strings the variable must be within quotes (ie, "$STR_VAR"),
+# for numbers and booleans they should be plain (ie, $INT_VAR, $BOOL_VAR)
+
+
+# Global tags can be specified here in key="value" format.
+[global_tags]
+  # dc = "us-east-1" # will tag all metrics with dc=us-east-1
+  # rack = "1a"
+  ## Environment variables can be used as tags, and throughout the config file
+  # user = "$USER"
+    server_uuid = "#SERVER_UUID#"
+    project_id = "#PROJECT_ID#"
+    server_ip = "#SERVER_IP#"
+    server_name = "#SERVER_NAME#"
+    org_code = "#ORG_CODE#"
+    server_type = "vm"
+
+
+
+# Configuration for telegraf agent
+[agent]
+  ## Default data collection interval for all inputs
+  interval = "20s"
+  ## Rounds collection interval to 'interval'
+  ## ie, if interval="10s" then always collect on :00, :10, :20, etc.
+  round_interval = true
+
+  ## Telegraf will send metrics to outputs in batches of at most
+  ## metric_batch_size metrics.
+  ## This controls the size of writes that Telegraf sends to output plugins.
+  metric_batch_size = 1000
+
+  ## For failed writes, telegraf will cache metric_buffer_limit metrics for each
+  ## output, and will flush this buffer on a successful write. Oldest metrics
+  ## are dropped first when this buffer fills.
+  ## This buffer only fills when writes fail to output plugin(s).
+  metric_buffer_limit = 10000
+
+  ## Collection jitter is used to jitter the collection by a random amount.
+  ## Each plugin will sleep for a random time within jitter before collecting.
+  ## This can be used to avoid many plugins querying things like sysfs at the
+  ## same time, which can have a measurable effect on the system.
+  collection_jitter = "0s"
+
+  ## Default flushing interval for all outputs. You shouldn't set this below
+  ## interval. Maximum flush_interval will be flush_interval + flush_jitter
+  flush_interval = "20s"
+  ## Jitter the flush interval by a random amount. This is primarily to avoid
+  ## large write spikes for users running a large number of telegraf instances.
+  ## ie, a jitter of 5s and interval 10s means flushes will happen every 10-15s
+  flush_jitter = "0s"
+
+  ## By default or when set to "0s", precision will be set to the same
+  ## timestamp order as the collection interval, with the maximum being 1s.
+  ##   ie, when interval = "10s", precision will be "1s"
+  ##       when interval = "250ms", precision will be "1ms"
+  ## Precision will NOT be used for service inputs. It is up to each individual
+  ## service input to set the timestamp at the appropriate precision.
+  ## Valid time units are "ns", "us" (or "µs"), "ms", "s".
+  precision = ""
+
+  ## Logging configuration:
+  ## Run telegraf with debug log messages.
+  debug = false
+  ## Run telegraf in quiet mode (error log messages only).
+  quiet = false
+  ## Specify the log file name. The empty string means to log to stderr.
+  logfile = ""
+
+  ## Override default hostname, if empty use os.Hostname()
+  hostname = ""
+  ## If set to true, do no set the "host" tag in the telegraf agent.
+  omit_hostname = false
+
+
+###############################################################################
+#                            OUTPUT PLUGINS                                   #
+###############################################################################
+
+ # Generic socket writer capable of handling multiple socket types.
+ [[outputs.socket_writer]]
+   ## URL to connect to
+   address = "tcp://#TARGET_HOST#:#TARGET_PORT#"
+   # address = "tcp://example.com:http"
+   # address = "tcp4://127.0.0.1:8094"
+   # address = "tcp6://127.0.0.1:8094"
+   # address = "tcp6://[2001:db8::1]:8094"
+   # address = "udp://127.0.0.1:8094"
+   # address = "udp4://127.0.0.1:8094"
+   # address = "udp6://127.0.0.1:8094"
+   # address = "unix:///tmp/telegraf.sock"
+   # address = "unixgram:///tmp/telegraf.sock"
+
+   ## Period between keep alive probes.
+   ## Only applies to TCP sockets.
+   ## 0 disables keep alive probes.
+   ## Defaults to the OS configuration.
+   # keep_alive_period = "5m"
+
+   ## Data format to generate.
+   ## Each data format has its own unique set of configuration options, read
+   ## more about them here:
+   ## https://github.com/influxdata/telegraf/blob/master/docs/DATA_FORMATS_INPUT.md
+   data_format = "influx"
+
+
+
+
+
+###############################################################################
+#                            PROCESSOR PLUGINS                                #
+###############################################################################
+
+# # Print all metrics that pass through this filter.
+# [[processors.printer]]
+
+
+
+###############################################################################
+#                            AGGREGATOR PLUGINS                               #
+###############################################################################
+
+# # Keep the aggregate basicstats of each metric passing through.
+# [[aggregators.basicstats]]
+#   ## General Aggregator Arguments:
+#   ## The period on which to flush & clear the aggregator.
+#   period = "30s"
+#   ## If true, the original metric will be dropped by the
+#   ## aggregator and will not get sent to the output plugins.
+#   drop_original = false
+
+
+# # Create aggregate histograms.
+# [[aggregators.histogram]]
+#   ## The period in which to flush the aggregator.
+#   period = "30s"
+#
+#   ## If true, the original metric will be dropped by the
+#   ## aggregator and will not get sent to the output plugins.
+#   drop_original = false
+#
+#   ## Example config that aggregates all fields of the metric.
+#   # [[aggregators.histogram.config]]
+#   #   ## The set of buckets.
+#   #   buckets = [0.0, 15.6, 34.5, 49.1, 71.5, 80.5, 94.5, 100.0]
+#   #   ## The name of metric.
+#   #   measurement_name = "cpu"
+#
+#   ## Example config that aggregates only specific fields of the metric.
+#   # [[aggregators.histogram.config]]
+#   #   ## The set of buckets.
+#   #   buckets = [0.0, 10.0, 20.0, 30.0, 40.0, 50.0, 60.0, 70.0, 80.0, 90.0, 100.0]
+#   #   ## The name of metric.
+#   #   measurement_name = "diskio"
+#   #   ## The concrete fields of metric
+#   #   fields = ["io_time", "read_time", "write_time"]
+
+
+# # Keep the aggregate min/max of each metric passing through.
+# [[aggregators.minmax]]
+#   ## General Aggregator Arguments:
+#   ## The period on which to flush & clear the aggregator.
+#   period = "30s"
+#   ## If true, the original metric will be dropped by the
+#   ## aggregator and will not get sent to the output plugins.
+#   drop_original = false
+
+
+
+###############################################################################
+#                            INPUT PLUGINS                                    #
+###############################################################################
+
+# Read metrics about cpu usage
+[[inputs.cpu]]
+  ## Whether to report per-cpu stats or not
+  percpu = true
+  ## Whether to report total system cpu stats or not
+  totalcpu = true
+  ## If true, collect raw CPU time metrics.
+  collect_cpu_time = false
+  ## If true, compute and report the sum of all non-idle CPU states.
+  report_active = true
+
+# Read metrics about disk usage by mount point
+[[inputs.disk]]
+  ## By default, telegraf gather stats for all mountpoints.
+  ## Setting mountpoints will restrict the stats to the specified mountpoints.
+  # mount_points = ["/"]
+
+  ## Ignore some mountpoints by filesystem type. For example (dev)tmpfs (usually
+  ## present on /run, /var/run, /dev/shm or /dev).
+  ignore_fs = ["tmpfs", "devtmpfs", "devfs"]
+
+
+# Read metrics about disk IO by device
+[[inputs.diskio]]
+  ## By default, telegraf will gather stats for all devices including
+  ## disk partitions.
+  ## Setting devices will restrict the stats to the specified devices.
+  # devices = ["sda", "sdb"]
+  ## Uncomment the following line if you need disk serial numbers.
+  # skip_serial_number = false
+  #
+  ## On systems which support it, device metadata can be added in the form of
+  ## tags.
+  ## Currently only Linux is supported via udev properties. You can view
+  ## available properties for a device by running:
+  ## 'udevadm info -q property -n /dev/sda'
+  # device_tags = ["ID_FS_TYPE", "ID_FS_USAGE"]
+  #
+  ## Using the same metadata source as device_tags, you can also customize the
+  ## name of the device via templates.
+  ## The 'name_templates' parameter is a list of templates to try and apply to
+  ## the device. The template may contain variables in the form of '$PROPERTY' or
+  ## '${PROPERTY}'. The first template which does not contain any variables not
+  ## present for the device is used as the device name tag.
+  ## The typical use case is for LVM volumes, to get the VG/LV name instead of
+  ## the near-meaningless DM-0 name.
+  # name_templates = ["$ID_FS_LABEL","$DM_VG_NAME/$DM_LV_NAME"]
+
+
+# Get kernel statistics from /proc/stat
+#[[inputs.kernel]]
+#  # no configuration
+
+
+# Read metrics about memory usage
+[[inputs.mem]]
+  # no configuration
+
+
+# Get the number of processes and group them by status
+[[inputs.processes]]
+  # no configuration
+
+
+# Read metrics about swap memory usage
+#[[inputs.swap]]
+#  # no configuration
+
+
+# Read metrics about system load & uptime
+[[inputs.system]]
+  # no configuration
+
+
+# # Read Apache status information (mod_status)
+# [[inputs.apache]]
+#   ## An array of URLs to gather from, must be directed at the machine
+#   ## readable version of the mod_status page including the auto query string.
+#   ## Default is "http://localhost/server-status?auto".
+#   urls = ["http://localhost/server-status?auto"]
+#
+#   ## Credentials for basic HTTP authentication.
+#   # username = "myuser"
+#   # password = "mypassword"
+#
+#   ## Maximum time to receive response.
+#   # response_timeout = "5s"
+#
+#   ## Optional SSL Config
+#   # ssl_ca = "/etc/telegraf/ca.pem"
+#   # ssl_cert = "/etc/telegraf/cert.pem"
+#   # ssl_key = "/etc/telegraf/key.pem"
+#   ## Use SSL but skip chain & host verification
+#   # insecure_skip_verify = false
+
+
+ [[inputs.exec]]
+   ## Commands array
+   commands = [
+     "/etc/telegraf/telegraf.d/proc_top.sh 10"
+   ]
+
+   ## Timeout for each command to complete.
+   timeout = "5s"
+
+   ## measurement name suffix (for separating different commands)
+   name_suffix = ""
+
+   ## Data format to consume.
+   ## Each data format has its own unique set of configuration options, read
+   ## more about them here:
+   ## https://github.com/influxdata/telegraf/blob/master/docs/DATA_FORMATS_INPUT.md
+   data_format = "influx"
+
+
+# # Read metrics of haproxy, via socket or csv stats page
+# [[inputs.haproxy]]
+#   ## An array of address to gather stats about. Specify an ip on hostname
+#   ## with optional port. ie localhost, 10.10.3.33:1936, etc.
+#   ## Make sure you specify the complete path to the stats endpoint
+#   ## including the protocol, ie http://10.10.3.33:1936/haproxy?stats
+#
+#   ## If no servers are specified, then default to 127.0.0.1:1936/haproxy?stats
+#   servers = ["http://myhaproxy.com:1936/haproxy?stats"]
+#
+#   ## You can also use local socket with standard wildcard globbing.
+#   ## Server address not starting with 'http' will be treated as a possible
+#   ## socket, so both examples below are valid.
+#   # servers = ["socket:/run/haproxy/admin.sock", "/run/haproxy/*.sock"]
+#
+#   ## By default, some of the fields are renamed from what haproxy calls them.
+#   ## Setting this option to true results in the plugin keeping the original
+#   ## field names.
+#   # keep_field_names = true
+#
+#   ## Optional SSL Config
+#   # ssl_ca = "/etc/telegraf/ca.pem"
+#   # ssl_cert = "/etc/telegraf/cert.pem"
+#   # ssl_key = "/etc/telegraf/key.pem"
+#   ## Use SSL but skip chain & host verification
+#   # insecure_skip_verify = false
+
+
+# # Read metrics from one or many mysql servers
+# [[inputs.mysql]]
+#   ## specify servers via a url matching:
+#   ##  [username[:password]@][protocol[(address)]]/[?tls=[true|false|skip-verify|custom]]
+#   ##  see https://github.com/go-sql-driver/mysql#dsn-data-source-name
+#   ##  e.g.
+#   ##    servers = ["user:passwd@tcp(127.0.0.1:3306)/?tls=false"]
+#   ##    servers = ["user@tcp(127.0.0.1:3306)/?tls=false"]
+#   #
+#   ## If no servers are specified, then localhost is used as the host.
+#   #servers = ["tcp(127.0.0.1:3306)/"]
+#   servers = ["root:root@tcp(127.0.0.1:3306)/?tls=false"]
+#   ## the limits for metrics form perf_events_statements
+#   perf_events_statements_digest_text_limit  = 120
+#   perf_events_statements_limit              = 250
+#   perf_events_statements_time_limit         = 86400
+#   #
+#   ## if the list is empty, then metrics are gathered from all databasee tables
+#   table_schema_databases                    = []
+#   #
+#   ## gather metrics from INFORMATION_SCHEMA.TABLES for databases provided above list
+#   gather_table_schema                       = false
+#   #
+#   ## gather thread state counts from INFORMATION_SCHEMA.PROCESSLIST
+#   gather_process_list                       = true
+#   #
+#   ## gather thread state counts from INFORMATION_SCHEMA.USER_STATISTICS
+#   gather_user_statistics                    = false
+#   #
+#   ## gather auto_increment columns and max values from information schema
+#   gather_info_schema_auto_inc               = false
+#   #
+#   ## gather metrics from INFORMATION_SCHEMA.INNODB_METRICS
+#   gather_innodb_metrics                     = true
+#   #
+#   ## gather metrics from SHOW SLAVE STATUS command output
+#   gather_slave_status                       = false
+#   #
+#   ## gather metrics from SHOW BINARY LOGS command output
+#   gather_binary_logs                        = false
+#   #
+#   ## gather metrics from PERFORMANCE_SCHEMA.TABLE_IO_WAITS_SUMMARY_BY_TABLE
+#   gather_table_io_waits                     = false
+#   #
+#   ## gather metrics from PERFORMANCE_SCHEMA.TABLE_LOCK_WAITS
+#   gather_table_lock_waits                   = false
+#   #
+#   ## gather metrics from PERFORMANCE_SCHEMA.TABLE_IO_WAITS_SUMMARY_BY_INDEX_USAGE
+#   gather_index_io_waits                     = false
+#   #
+#   ## gather metrics from PERFORMANCE_SCHEMA.EVENT_WAITS
+#   gather_event_waits                        = false
+#   #
+#   ## gather metrics from PERFORMANCE_SCHEMA.FILE_SUMMARY_BY_EVENT_NAME
+#   gather_file_events_stats                  = false
+#   #
+#   ## gather metrics from PERFORMANCE_SCHEMA.EVENTS_STATEMENTS_SUMMARY_BY_DIGEST
+#   gather_perf_events_statements             = false
+#   #
+#   ## Some queries we may want to run less often (such as SHOW GLOBAL VARIABLES)
+#   interval_slow                   = "30m"
+
+#   ## Optional SSL Config (will be used if tls=custom parameter specified in server uri)
+#   ssl_ca = "/etc/telegraf/ca.pem"
+#   ssl_cert = "/etc/telegraf/cert.pem"
+#   ssl_key = "/etc/telegraf/key.pem"
+
+
+# # Read metrics about network interface usage
+ [[inputs.net]]
+   ## By default, telegraf gathers stats from any up interface (excluding loopback)
+   ## Setting interfaces will tell it to gather these explicit interfaces,
+   ## regardless of status.
+   ##
+   # interfaces = ["eth0"]
+
+
+
+# # Read TCP metrics such as established, time wait and sockets counts.
+# [[inputs.netstat]]
+#   # no configuration
+
+
+# # Read Nginx's basic status information (ngx_http_stub_status_module)
+# [[inputs.nginx]]
+#   # An array of Nginx stub_status URI to gather stats.
+#   urls = ["http://localhost/server_status"]
+#
+#   # TLS/SSL configuration
+#   ssl_ca = "/etc/telegraf/ca.pem"
+#   ssl_cert = "/etc/telegraf/cert.cer"
+#   ssl_key = "/etc/telegraf/key.key"
+#   insecure_skip_verify = false
+#
+#   # HTTP response timeout (default: 5s)
+#   response_timeout = "5s"
+
+
+# # Read Nginx Plus' full status information (ngx_http_status_module)
+# [[inputs.nginx_plus]]
+#   ## An array of ngx_http_status_module or status URI to gather stats.
+#   urls = ["http://localhost/status"]
+#
+#   # HTTP response timeout (default: 5s)
+#   response_timeout = "5s"
+
+
+# # Monitor process cpu and memory usage
+# [[inputs.procstat]]
+#   ## Must specify one of: pid_file, exe, or pattern
+#   ## PID file to monitor process
+#   pid_file = "/var/run/nginx.pid"
+#   ## executable name (ie, pgrep <exe>)
+#   # exe = "nginx"
+#   ## pattern as argument for pgrep (ie, pgrep -f <pattern>)
+#   # pattern = "nginx"
+#   ## user as argument for pgrep (ie, pgrep -u <user>)
+#   # user = "nginx"
+#   ## Systemd unit name
+#   # systemd_unit = "nginx.service"
+#   ## CGroup name or path
+#   # cgroup = "systemd/system.slice/nginx.service"
+#
+#   ## override for process_name
+#   ## This is optional; default is sourced from /proc/<pid>/status
+#   # process_name = "bar"
+#   ## Field name prefix
+#   prefix = ""
+#   ## comment this out if you want raw cpu_time stats
+#   fielddrop = ["cpu_time_*"]
+#   ## This is optional; moves pid into a tag instead of a field
+#   pid_tag = false
+
+
+# # Sysstat metrics collector
+# [[inputs.sysstat]]
+#   ## Path to the sadc command.
+#   #
+#   ## Common Defaults:
+#   ##   Debian/Ubuntu: /usr/lib/sysstat/sadc
+#   ##   Arch:          /usr/lib/sa/sadc
+#   ##   RHEL/CentOS:   /usr/lib64/sa/sadc
+#   sadc_path = "/usr/lib/sa/sadc" # required
+#   #
+#   #
+#   ## Path to the sadf command, if it is not in PATH
+#   # sadf_path = "/usr/bin/sadf"
+#   #
+#   #
+#   ## Activities is a list of activities, that are passed as argument to the
+#   ## sadc collector utility (e.g: DISK, SNMP etc...)
+#   ## The more activities that are added, the more data is collected.
+#   # activities = ["DISK"]
+#   #
+#   #
+#   ## Group metrics to measurements.
+#   ##
+#   ## If group is false each metric will be prefixed with a description
+#   ## and represents itself a measurement.
+#   ##
+#   ## If Group is true, corresponding metrics are grouped to a single measurement.
+#   # group = true
+#   #
+#   #
+#   ## Options for the sadf command. The values on the left represent the sadf
+#   ## options and the values on the right their description (which are used for
+#   ## grouping and prefixing metrics).
+#   ##
+#   ## Run 'sar -h' or 'man sar' to find out the supported options for your
+#   ## sysstat version.
+#   [inputs.sysstat.options]
+#     -C = "cpu"
+#     -B = "paging"
+#     -b = "io"
+#     -d = "disk"             # requires DISK activity
+#     "-n ALL" = "network"
+#     "-P ALL" = "per_cpu"
+#     -q = "queue"
+#     -R = "mem"
+#     -r = "mem_util"
+#     -S = "swap_util"
+#     -u = "cpu_util"
+#     -v = "inode"
+#     -W = "swap"
+#     -w = "task"
+#   #  -H = "hugepages"        # only available for newer linux distributions
+#   #  "-I ALL" = "interrupts" # requires INT activity
+#   #
+#   #
+#   ## Device tags can be used to add additional tags for devices.
+#   ## For example the configuration below adds a tag vg with value rootvg for
+#   ## all metrics with sda devices.
+#   # [[inputs.sysstat.device_tags.sda]]
+#   #  vg = "rootvg"
+
+
+# # Gather metrics from the Tomcat server status page.
+# [[inputs.tomcat]]
+#   ## URL of the Tomcat server status
+#   # url = "http://127.0.0.1:8080/manager/status/all?XML=true"
+#
+#   ## HTTP Basic Auth Credentials
+#   # username = "tomcat"
+#   # password = "s3cret"
+#
+#   ## Request timeout
+#   # timeout = "5s"
+#
+#   ## Optional SSL Config
+#   # ssl_ca = "/etc/telegraf/ca.pem"
+#   # ssl_cert = "/etc/telegraf/cert.pem"
+#   # ssl_key = "/etc/telegraf/key.pem"
+#   ## Use SSL but skip chain & host verification
+#   # insecure_skip_verify = false

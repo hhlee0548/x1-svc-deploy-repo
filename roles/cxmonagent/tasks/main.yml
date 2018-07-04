@@ -44,6 +44,7 @@
   tags:
   - remove
 
+
 - name: stop haproxy
   systemd: name=haproxy state=stopped
   tags:
@@ -58,29 +59,3 @@
   systemd: name=haproxy state=restarted
   tags:
   - restart
-
-
-- name: telegraf add haproxy monitoring
-  ini_file:
-    path: /etc/telegraf/telegraf.conf
-    section: "[inputs.haproxy]"
-    option: "{{ item.option }}"
-    value: "{{ item.value }}"
-    state: present
-  with_items:
-    - { option: "servers", value: ["http://admin:{% if monitor is defined %}{{ monitor.haproxy_passwd | default('admin') }}{% else %}admin{% endif %}@localhost:1936/haproxy?stats"] }
-  notify: restart-telegraf
-  when: telegraf_conf.stat.exists
-  tags:
-  - install
-  - config
-
-- name: telegraf remove haproxy monitoring
-  ini_file:
-    path: /etc/telegraf/telegraf.conf
-    section: "[inputs.haproxy]"
-    state: absent
-  when: telegraf_conf.stat.exists
-  tags:
-  - remove
-

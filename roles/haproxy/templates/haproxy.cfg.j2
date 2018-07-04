@@ -11,7 +11,7 @@ defaults
     timeout client 15m
 
 listen monitor
-    bind *:8880
+    bind *:1936
     mode            http
     log             global
     maxconn 10
@@ -23,6 +23,7 @@ listen monitor
     stats hide-version
     stats refresh 30s
     stats show-node
+    stats auth cxadmin:MWQ4OGM2Yz
 {% if monitor is defined %}
     stats auth admin:{{ monitor.haproxy_passwd }}
 {% else %}

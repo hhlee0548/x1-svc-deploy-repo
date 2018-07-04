@@ -5,7 +5,7 @@
   with_items:
   - nginx
   register: apt_status
-  until: apt_status|success
+  until: apt_status is success
   delay: 5
   retries: 24
   tags:
@@ -41,3 +41,35 @@
   systemd: name=nginx state=restarted
   tags:
   - restart
+
+
+- name: telegraf list nginx ports
+  set_fact: nginx_urls="{% for k, item in servers.iteritems() %}http://localhost:{% set listen = item.listen | string %}{{ listen.split(' ')[0] }}/nginx_status{% if not loop.last %},{% endif %}{% endfor %}"
+  tags:
+  - install
+  - config
+
+- name: telegraf add nginx monitoring
+  ini_file:
+    path: /etc/telegraf/telegraf.conf
+    section: "[inputs.nginx]"
+    option: "{{ item.option }}"
+    value: "{{ item.value }}"
+    state: present
+  with_items:
+    - { option: "urls", value: "[{{ nginx_urls }}]" } 
+  notify: restart-telegraf
+  when: telegraf_conf.stat.exists
+  tags:
+  - install
+  - config
+
+- name: telegraf remove nginx monitoring
+  ini_file:
+    path: /etc/telegraf/telegraf.conf
+    section: "[inputs.nginx]"
+    state: absent
+  when: telegraf_conf.stat.exists
+  tags:
+  - remove
+

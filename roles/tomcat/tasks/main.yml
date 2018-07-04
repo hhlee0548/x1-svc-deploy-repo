@@ -3,7 +3,7 @@
 - name: install openjdk
   apt: pkg={{ java_package }} state=present
   register: apt_status
-  until: apt_status|success
+  until: apt_status is success
   delay: 5
   retries: 24
   tags:
@@ -93,6 +93,13 @@
   - install
   - config
 
+- name: stop tomcat
+  become: true
+  systemd: name=tomcat state=stopped 
+  tags:
+  - stop
+  - remove
+
 - name: remove tomcat
   file: path=/usr/local/tomcat/{{ tomcat_version }} state=absent
   tags:
@@ -108,12 +115,6 @@
   tags:
   - remove
 
-- name: stop tomcat
-  become: true
-  systemd: name=tomcat state=stopped 
-  tags:
-  - stop
-
 - name: start tomcat
   become: true
   systemd: name=tomcat state=started
@@ -125,3 +126,31 @@
   systemd: name=tomcat state=restarted
   tags:
   - restart
+
+
+- name: telegraf add tomcat monitoring
+  ini_file:
+    path: /etc/telegraf/telegraf.conf
+    section: "[inputs.tomcat]"
+    option: "{{ item.option }}"
+    value: "{{ item.value }}"
+    state: present
+  with_items:
+    - { option: "url", value: "http://localhost:{{ http_port }}/manager/status/all?XML=true" }
+    - { option: "username", value: "{{ admin_username }}" }
+    - { option: "password", value: "{{ admin_password }}" }
+  notify: restart-telegraf
+  when: telegraf_conf.stat.exists
+  tags:
+  - install
+  - config
+
+- name: telegraf remove tomcat monitoring
+  ini_file:
+    path: /etc/telegraf/telegraf.conf
+    section: "[inputs.tomcat]"
+    state: absent
+  when: telegraf_conf.stat.exists
+  tags:
+  - remove
+

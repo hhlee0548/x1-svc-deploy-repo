@@ -1,0 +1,120 @@
+- import_tasks: ../common/tasks/main.yml
+
+# move to common.yml
+#- name: telegraf conf file exists
+#  stat:
+#    path: /etc/telegraf/telegraf.conf
+#  register: telegraf_conf
+#  tags:
+#  - install
+#  - config
+#  - remove
+
+- name: telegraf add haproxy monitoring
+  ini_file:
+    path: /etc/telegraf/telegraf.conf
+    section: "[inputs.haproxy]"
+    option: "{{ item.option }}"
+    value: "{{ item.value }}"
+    state: present
+  with_items:
+    - { option: "servers", value: ["http://admin:{% if monitor is defined %}{{ monitor.haproxy_passwd | default('admin') }}{% else %}admin{% endif %}@localhost:1936/haproxy?stats"] }
+  notify: restart-telegraf
+  when: telegraf_conf.stat.exists
+  tags:
+  - install
+  - config
+
+- name: telegraf remove haproxy monitoring
+  ini_file:
+    path: /etc/telegraf/telegraf.conf
+    section: "[inputs.haproxy]"
+    state: absent
+  when: telegraf_conf.stat.exists
+  tags:
+  - remove
+
+- name: telegraf list nginx ports 
+  set_fact: nginx_urls="{% for k, item in servers.iteritems() %}http://localhost:{% set listen = item.listen | string %}{{ listen.split(' ')[0] }}/nginx_status{% if not loop.last %},{% endif %}{% endfor %}"
+  tags:
+  - install
+  - config
+
+- name: telegraf add nginx monitoring
+  ini_file:
+    path: /etc/telegraf/telegraf.conf
+    section: "[inputs.nginx]"
+    option: "{{ item.option }}"
+    value: "{{ item.value }}"
+    state: present
+  with_items:
+    - { option: "urls", value: "[{{ nginx_urls }}]" } 
+  #notify: restart-telegraf
+  when: telegraf_conf.stat.exists
+  tags:
+  - install
+  - config
+
+- name: telegraf remove nginx monitoring
+  ini_file:
+    path: /etc/telegraf/telegraf.conf
+    section: "[inputs.nginx]"
+    state: absent
+  when: telegraf_conf.stat.exists
+  tags:
+  - remove
+
+
+
+- name: telegraf add tomcat monitoring
+  ini_file:
+    path: /etc/telegraf/telegraf.conf
+    section: "[inputs.tomcat]"
+    option: "{{ item.option }}"
+    value: "{{ item.value }}"
+    state: present
+  with_items:
+    - { option: "url", value: "http://localhost:{{ http_port }}/manager/status/all?XML=true" }
+    - { option: "username", value: "{{ admin_username }}" }
+    - { option: "password", value: "{{ admin_password }}" }
+  #notify: restart-telegraf
+  when: telegraf_conf.stat.exists
+  tags:
+  - install
+  - config
+
+- name: telegraf remove tomcat monitoring
+  ini_file:
+    path: /etc/telegraf/telegraf.conf
+    section: "[inputs.tomcat]"
+    state: absent
+  when: telegraf_conf.stat.exists
+  tags:
+  - remove
+
+
+- name: telegraf add mysql monitoring
+  ini_file:
+    path: /etc/telegraf/telegraf.conf
+    section: "[inputs.mysql]"
+    option: "{{ item.option }}"
+    value: "{{ item.value }}"
+    state: present
+  with_items:
+    - { option: "servers", value: ["root:{{ mysql_root_pass }}@tcp(localhost:3306)/?tls=false"] }
+  #notify: restart-telegraf
+  when: telegraf_conf.stat.exists
+  tags:
+  - install
+  - config
+
+- name: telegraf remove mysql monitoring
+  ini_file:
+    path: /etc/telegraf/telegraf.conf
+    section: "[inputs.mysql]"
+    state: absent
+  when: telegraf_conf.stat.exists
+  tags:
+  - remove
+
+

@@ -1,3 +1,5 @@
+- import_tasks: ../common/handlers/main.yml
+
 - name: restart-tomcat
   systemd: name=tomcat state=restarted
 
