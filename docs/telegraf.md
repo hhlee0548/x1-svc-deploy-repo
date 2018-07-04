@@ -3,7 +3,33 @@
 - Add or remove system software monitoring configuration block in /etc/telegraf/telegraf.conf
 
 
-## telegraf 
+## telegraf
+- haproxy monitor example 
+```
+- name: telegraf add haproxy monitoring
+  ini_file:
+    path: /etc/telegraf/telegraf.conf
+    section: "[inputs.haproxy]"
+    option: "{{ item.option }}"
+    value: "{{ item.value }}"
+    state: present
+  with_items:
+    - { option: "servers", value: ["http://admin:{% if monitor is defined %}{{ monitor.haproxy_passwd | default('admin') }}{% else %}admin{% endif %}@localhost:1936/haproxy?stats"] }
+  notify: restart-telegraf
+  when: telegraf_conf.stat.exists
+  tags:
+  - install
+  - config
+
+- name: telegraf remove haproxy monitoring
+  ini_file:
+    path: /etc/telegraf/telegraf.conf
+    section: "[inputs.haproxy]"
+    state: absent
+  when: telegraf_conf.stat.exists
+  tags:
+  - remove
+```
 ## haproxy monitoring
 - 설정 가용
 ```
