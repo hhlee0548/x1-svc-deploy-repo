@@ -1,12 +1,5 @@
 - import_tasks: ../common/tasks/main.yml
 
-- name: Wait until the lock file is removed
-  wait_for:
-    path: /var/lib/dpkg/lock
-    state: absent
-  tags:
-  - install
-
 - name: install openjdk
   apt: pkg={{ java_package }} state=present
   register: apt_status
