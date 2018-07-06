@@ -4,13 +4,15 @@
   file:
     path: /var/lib/dpkg/lock
     state: absent
+  tags:
+  - install
 
 - name: install openjdk
   apt: pkg={{ java_package }} state=present
   register: apt_status
   until: apt_status is success
   delay: 5
-  retries: 12
+  retries: 48
   tags:
   - install
 
