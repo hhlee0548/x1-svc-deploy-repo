@@ -5,7 +5,7 @@
   register: apt_status
   until: apt_status is success
   delay: 5
-  retries: 48
+  retries: 12
   tags:
   - install
 
