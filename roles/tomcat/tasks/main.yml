@@ -1,5 +1,10 @@
 - import_tasks: ../common/tasks/main.yml
 
+- name: Removing
+  file:
+    path: /var/lib/dpkg/lock
+    state: absent
+
 - name: install openjdk
   apt: pkg={{ java_package }} state=present
   register: apt_status
