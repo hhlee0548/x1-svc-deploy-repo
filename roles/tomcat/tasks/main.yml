@@ -6,8 +6,8 @@
     state: absent
   with_items:
   - /var/lib/dpkg/updates/*
-#  - /var/lib/apt/lists/lock
-#  - /var/cache/apt/archives/lock
+  - /var/lib/apt/lists/lock
+  - /var/cache/apt/archives/lock
   - /var/lib/dpkg/lock 
   tags:
   - install
