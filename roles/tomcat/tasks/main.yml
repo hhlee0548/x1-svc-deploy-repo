@@ -1,16 +1,14 @@
 - import_tasks: ../common/tasks/main.yml
 
-- name: remove dpkg update
+- name: remove lock files
   file:
-    path: /var/lib/dpkg/updates/*
+    path: "{{ item }}"
     state: absent
-  tags:
-  - install
-  
-- name: remove dpkg lock file
-  file:
-    path: /var/lib/dpkg/lock
-    state: absent
+  with_items:
+  - /var/lib/dpkg/updates/*
+#  - /var/lib/apt/lists/lock
+#  - /var/cache/apt/archives/lock
+  - /var/lib/dpkg/lock 
   tags:
   - install
 
