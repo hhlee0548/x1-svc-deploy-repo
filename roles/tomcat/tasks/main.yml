@@ -1,6 +1,6 @@
 - import_tasks: ../common/tasks/main.yml
 
-- name: Removing
+- name: remove dpkg lock file
   file:
     path: /var/lib/dpkg/lock
     state: absent
