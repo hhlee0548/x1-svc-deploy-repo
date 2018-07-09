@@ -20,6 +20,13 @@
   with_items: "{{ _apt_repository }}"
   tags: install
 
+- name: remove dpkg lock file
+  file:
+    path: /var/lib/dpkg/lock
+    state: absent
+  tags:
+  - install
+
 - name: apt-get install
   apt:
     name: "{{ item.name }}"
