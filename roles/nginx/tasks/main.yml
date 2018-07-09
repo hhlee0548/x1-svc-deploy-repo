@@ -1,5 +1,12 @@
 - import_tasks: ../common/tasks/main.yml
 
+- name: remove dpkg lock file
+  file:
+    path: /var/lib/dpkg/lock
+    state: absent
+  tags:
+  - install
+  
 - name: install nginx
   apt: pkg={{ item }} state=present
   with_items:
