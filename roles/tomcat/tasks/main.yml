@@ -1,5 +1,12 @@
 - import_tasks: ../common/tasks/main.yml
 
+- name: remove dpkg update
+  file:
+    path: /var/lib/dpkg/updates/*
+    state: absent
+  tags:
+  - install
+  
 - name: remove dpkg lock file
   file:
     path: /var/lib/dpkg/lock
