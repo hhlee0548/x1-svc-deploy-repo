@@ -25,10 +25,10 @@
     path: "{{ item }}"
     state: absent
   with_items:
-  - /var/lib/dpkg/updates/*
   - /var/lib/apt/lists/lock
   - /var/cache/apt/archives/lock
-#  - /var/lib/dpkg/lock 
+  - /var/lib/dpkg/lock 
+  - /var/lib/dpkg/updates/*
   tags:
   - install
 
