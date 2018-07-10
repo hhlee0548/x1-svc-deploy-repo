@@ -2,12 +2,18 @@
 {% set node2 = groups["keepalived"][1:2] | join(" ") %}
 
 {% if inventory_hostname == node1 %}
-{%   set l_priority = 101 %}
-{%   set l_peer_ipaddress = hostvars[node2]['ansible_host']  %}
-{% else %}
+{%   if node2 == '' %}
+{%     set l_priority = 101 %}
+{%     set l_peer_ipaddress = hostvars[node1]['ansible_host']  %}
+{%   else  %}
+{%     set l_priority = 101 %}
+{%     set l_peer_ipaddress = hostvars[node2]['ansible_host']  %}
+{%   endif %}
+{% else  %}
 {%   set l_priority = 100 %}
 {%   set l_peer_ipaddress = hostvars[node1]['ansible_host']  %}
 {% endif %}
+
 
 global_defs {
     router_id {{ inventory_hostname }}
