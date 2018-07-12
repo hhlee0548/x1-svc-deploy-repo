@@ -1,5 +1,6 @@
 
 #mariadb2
 cluster_name: wsrep_cluster_xxx
-mysql_master_node: mariadb2
+#mysql_master_node: mariadb2
 mysql_root_pass: "password"
+sstuser_pass: "password"

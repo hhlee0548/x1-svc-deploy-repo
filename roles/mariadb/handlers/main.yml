@@ -3,5 +3,13 @@
 - name: restart-mysql
   service: name=mysql state=restarted
 
+- name: check running mysqld process
+  shell: "ps -ef | grep -v grep | grep mysqld | awk '{print $2}'"
+  register: running_process
+  listen: "force-stop-mysql"
 
+- name: force stop mysqld
+  shell: "kill -9 {{ item }}"
+  with_items: "{{ running_process.stdout_lines }}"
+  listen: "force-stop-mysql"
 

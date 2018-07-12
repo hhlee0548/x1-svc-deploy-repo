@@ -1,4 +1,4 @@
-if [[ "$1" == "" || "$1" != "install" && "$1" != "config" && "$1" != "remove" ]]; then
+if [[ "$1" == "" || "$1" != "install" && "$1" != "config" && "$1" != "remove" && "$1" != "stop" && "$1" != "start" && "$1" != "status" && "$1" != "bootstrap" ]]; then
     echo "$0 [install | config | remove]"
     exit 1
 fi
