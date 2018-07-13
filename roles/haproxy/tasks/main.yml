@@ -37,6 +37,15 @@
   - install
   - config
 
+- name: config syslog 
+  replace:
+    path: /etc/rsyslog.d/49-haproxy.conf
+    regexp: "^if \\$programname startswith 'haproxy' then /var/log/haproxy.log"
+    replace: "#if $programname startswith 'haproxy' then /var/log/haproxy.log"
+  notify: restart-haproxy
+  tags:
+  - install
+
 - name: remove haproxy
   apt: pkg={{ item }} state=absent purge=true
   with_items:

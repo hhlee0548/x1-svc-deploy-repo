@@ -23,7 +23,7 @@
   tags:
   - install
 
-- name: config nginx.cfg
+- name: config site cfg
   template:
     src: default.j2
     dest: /etc/nginx/sites-enabled/default
@@ -31,6 +31,24 @@
   tags:
   - install
   - config
+
+- name: config syslog for access_log
+  replace:
+    path: /etc/nginx/nginx.conf
+    regexp: 'access_log /var/log/nginx/access.log;'
+    replace: 'access_log syslog:server=unix:/dev/log,nohostname,facility=local7,severity=info combined;'
+  notify: restart-nginx
+  tags:
+  - install
+
+- name: config syslog for error_log
+  replace:
+    path: /etc/nginx/nginx.conf
+    regexp: 'error_log /var/log/nginx/error.log;'
+    replace: 'error_log syslog:server=unix:/dev/log,nohostname,facility=local7,severity=error warn;'
+  notify: restart-nginx
+  tags:
+  - install
 
 - name: remove nginx
   apt: pkg={{ item }} state=absent purge=true
