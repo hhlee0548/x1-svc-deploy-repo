@@ -115,3 +115,7 @@ sudo service tomcat8 restart
 
 8. elasticsearh 조회
 ![image](https://user-images.githubusercontent.com/29765201/42433379-14214826-838a-11e8-9aaf-d11539b554a0.png)
+
+
+## 참고자료
+- https://github.com/KMK-ONLINE/SyslogValve
