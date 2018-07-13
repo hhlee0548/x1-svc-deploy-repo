@@ -4,6 +4,9 @@
 - nginx -> syslog 출력 설정
 - 파일 : /etc/nginx/nginx.conf
 ```
+access_log /var/log/nginx/access.log;
+error_log /var/log/nginx/error.log;
+==>
 access_log syslog:server=unix:/dev/log,nohostname,facility=local7,severity=info combined;
 error_log syslog:server=unix:/dev/log,nohostname,facility=local7,severity=error warn;
 ```
@@ -13,6 +16,8 @@ error_log syslog:server=unix:/dev/log,nohostname,facility=local7,severity=error 
 - 파일 /etc/rsyslog.d/49-haproxy.conf의 다음 라인 주석처리
 ```
 if $programname startswith 'haproxy' then /var/log/haproxy.log
+==>
+#if $programname startswith 'haproxy' then /var/log/haproxy.lo
 ```
 
 ## mariadb
@@ -110,3 +115,7 @@ sudo service tomcat8 restart
 
 8. elasticsearh 조회
 ![image](https://user-images.githubusercontent.com/29765201/42433379-14214826-838a-11e8-9aaf-d11539b554a0.png)
+
+
+## 참고자료
+- https://github.com/KMK-ONLINE/SyslogValve
