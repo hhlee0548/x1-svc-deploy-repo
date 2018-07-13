@@ -4,9 +4,7 @@
 ## Tomcat 설정
 ```
 java_package: openjdk-8-jdk  //  openjdk-9-jdk 두 옵션 지원
-
-tomcat_download_url: http://archive.apache.org/dist/tomcat/tomcat-7/v7.0.61/bin/apache-tomcat-7.0.61.tar.gz
-tomcat_version: tomcat-7.0.61
+tomcat_version: tomcat-7 // 8
 tomcat_memory_ms: 512M
 tomcat_memory_mx: 1024M
 admin_username: admin
