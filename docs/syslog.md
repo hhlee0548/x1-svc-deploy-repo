@@ -33,6 +33,10 @@ if $programname startswith 'haproxy' then /var/log/haproxy.log
   파일 : /etc/rsyslog.conf
 ```
 # provides TCP syslog reception
+#module(load="imtcp")
+#input(type="imtcp" port="514")
+==>
+# provides TCP syslog reception
 module(load="imtcp")
 input(type="imtcp" address="127.0.0.1" port="514")
 ```
@@ -47,55 +51,24 @@ sudo service rsyslog restart
 ```
 
 4. tomcat8 - classpath 추가
-```
-sudo vi /usr/share/tomcat8/bin/setenv.sh
-```
+- /usr/local/tomcat/{{ tomcat_version }}/bin/setenv.sh 파일 생성
 ```
 #!/bin/bash
-CLASSPATH="${CLASSPATH}:/usr/share/tomcat8/lib/agafua-syslog-0.3.jar"
+CLASSPATH="${CLASSPATH}:/usr/local/tomcat/{{ tomcat_version }}/lib/agafua-syslog-0.3.jar"
 ```
 ```
-sudo chmod 744  /usr/share/tomcat8/bin/setenv.sh
+sudo chmod 744  /usr/local/tomcat/{{ tomcat_version }}/bin/setenv.sh
 ```
 5. tomcat8 - log 설정 추가
-   파일 : /var/lib/tomcat8/conf/logging.properties
+- 파일 : /usr/local/tomcat/{{ tomcat_version }}/conf/logging.properties
 ```
+handlers = 1catalina.org.apache.juli.FileHandler, 2localhost.org.apache.juli.FileHandler, java.util.logging.ConsoleHandler
+.handlers = 1catalina.org.apache.juli.FileHandler, java.util.logging.ConsoleHandler
+==> 
 handlers = 1catalina.org.apache.juli.FileHandler, 2localhost.org.apache.juli.FileHandler, java.util.logging.ConsoleHandler, com.agafua.syslog.SyslogHandler
-
 .handlers = 1catalina.org.apache.juli.FileHandler, java.util.logging.ConsoleHandler, com.agafua.syslog.SyslogHandler
 
-############################################################
-# Handler specific properties.
-# Describes specific configuration info for Handlers.
-############################################################
-
-1catalina.org.apache.juli.FileHandler.level = FINE
-1catalina.org.apache.juli.FileHandler.directory = ${catalina.base}/logs
-1catalina.org.apache.juli.FileHandler.prefix = catalina.
-
-2localhost.org.apache.juli.FileHandler.level = FINE
-2localhost.org.apache.juli.FileHandler.directory = ${catalina.base}/logs
-2localhost.org.apache.juli.FileHandler.prefix = localhost.
-
-java.util.logging.ConsoleHandler.level = FINE
-java.util.logging.ConsoleHandler.formatter = java.util.logging.SimpleFormatter
-
-############################################################
-# Facility specific properties.
-# Provides extra control for each logger.
-############################################################
-
-org.apache.catalina.core.ContainerBase.[Catalina].[localhost].level = INFO
-org.apache.catalina.core.ContainerBase.[Catalina].[localhost].handlers = 2localhost.org.apache.juli.FileHandler
-
-# For example, set the com.xyz.foo logger to only log SEVERE
-# messages:
-#org.apache.catalina.startup.ContextConfig.level = FINE
-#org.apache.catalina.startup.HostConfig.level = FINE
-#org.apache.catalina.session.ManagerBase.level = FINE
-#org.apache.catalina.core.AprLifecycleListener.level=FINE
-
-#syslog
+#syslog 추가
 com.agafua.syslog.SyslogHandler.transport = tcp
 com.agafua.syslog.SyslogHandler.facility = local7
 com.agafua.syslog.SyslogHandler.port = 514
