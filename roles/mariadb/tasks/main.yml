@@ -22,17 +22,17 @@
   with_items: "{{ _apt_repository }}"
   tags: install
 
-# - name: remove lock files
-#   file:
-#    path: "{{ item }}"
-#    state: absent
-#  with_items:
-#  - /var/lib/apt/lists/lock
-#  - /var/cache/apt/archives/lock
-#  - /var/lib/dpkg/lock 
-#  - /var/lib/dpkg/updates/*
-#  tags:
-#  - install
+- name: remove lock files
+  file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+  - /var/lib/apt/lists/lock
+  - /var/cache/apt/archives/lock
+  - /var/lib/dpkg/lock 
+  - /var/lib/dpkg/updates/*
+  tags:
+  - install
 
 - name: apt-get install
   apt:
@@ -43,7 +43,7 @@
   register: apt_status
   until: apt_status is success
   delay: 5
-  retries: 2 # 4
+  retries: 24
   notify: restart-mysql
   tags: install
 
