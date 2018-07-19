@@ -1,5 +1,34 @@
 # Nginx Web Server 설계
 
+## 사용자 UI
+
+- 서버 도메인: 
+  - (기본) kpaasta.cloud
+  - (추가) www.kpaasta.cloud  (-)
+  - (추가) portal.kpaasta.cloud (+)
+- 서버 포트: 8080
+- HTTPS 활성화: True/False
+  - HTTPS Only: True/False
+  - SSL 인증서: 
+    - Textfield: Private Key 
+    - Textfield: Public Key
+    - Textfield: CA Key
+- 웹 리소스
+  - 접속경로 기본: "/" 
+    - 파일 지정 [X] LB 지정 [ ]
+      - 파일 경로: /home/ubuntu/nginx/default/
+      - 지정 방식: Zip 파일 직접 업로드 [ ] Github 위치 지정 [ ]
+  - 접속경로 추가: "/comm/" 
+    - 파일 지정 [X] LB 지정 [ ]
+      - 파일 경로: /home/ubuntu/nginx/comm/
+      - 지정 방식: Zip 파일 직접 업로드 [ ] Github 위치 지정 [ ]
+  - 접속경로 추가: "/comm-api/" 
+    - 파일 지정 [ ] LB 지정 [X]
+      - LB 선택: LB-WAS
+- 에러 페이지: 
+  - 404 에러: /404.html
+  - 50x 에러: /50x.html
+- 업로드 최대 파일 크기: 10M
 
 ## 설정 conf
 - resource 의 location 규칙
