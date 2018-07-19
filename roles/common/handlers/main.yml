@@ -5,3 +5,6 @@
   #when: telegraf_service_status.rc == 0
   when: telegraf_conf.stat.exists
 
+- name: restart-rsyslog
+  service: name=rsyslog state=restarted
+

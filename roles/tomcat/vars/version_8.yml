@@ -1,0 +1,4 @@
+tomcat_fullversion: 8.5.32
+tomcat_shortversion: 8
+tomcat_version_dir: tomcat-{{ tomcat_shortversion }}
+tomcat_download_url: http://archive.apache.org/dist/tomcat/tomcat-{{tomcat_version}}/v{{ tomcat_fullversion }}/bin/apache-tomcat-{{ tomcat_fullversion }}.tar.gz 

@@ -5,20 +5,21 @@ After=syslog.target network.target
 
 [Service]
 Type=forking
+WorkingDirectory=/usr/local/tomcat/{{ tomcat_version_dir }}
 
-{% if tomcat_version == "openjdk-8-jdk" %}
+{% if java_package == "openjdk-8-jdk" %}
 Environment=JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64/
-{% elif tomcat_version == "openjdk-7-jdk"  %}
+{% elif java_package == "openjdk-7-jdk"  %}
 Environment=JAVA_HOME=/usr/lib/jvm/java-7-openjdk-amd64/
 {% endif %}
 Environment='JAVA_OPTS=-Djava.awt.headless=true -Djava.security.egd=file:/dev/./urandom'
-Environment=CATALINA_PID=/usr/local/tomcat/{{ tomcat_version }}/run/tomcat.pid
-Environment=CATALINA_HOME=/usr/local/tomcat/{{ tomcat_version }}
-Environment=CATALINA_BASE=/usr/local/tomcat/{{ tomcat_version }}
+Environment=CATALINA_PID=/usr/local/tomcat/{{ tomcat_version_dir }}/bin/tomcat.pid
+Environment=CATALINA_HOME=/usr/local/tomcat/{{ tomcat_version_dir }}
+Environment=CATALINA_BASE=/usr/local/tomcat/{{ tomcat_version_dir }}
 Environment='CATALINA_OPTS=-Xms{{ tomcat_memory_ms | default("512M") }} -Xmx{{ tomcat_memory_mx | default("1024M") }} -server -XX:+UseParallelGC'
 
-ExecStart=/usr/local/tomcat/{{ tomcat_version }}/bin/startup.sh
-ExecStop=/usr/local/tomcat/{{ tomcat_version }}/bin/shutdown.sh
+ExecStart=/usr/local/tomcat/{{ tomcat_version_dir }}/bin/startup.sh
+ExecStop=/usr/local/tomcat/{{ tomcat_version_dir }}/bin/shutdown.sh
 
 User=tomcat
 Group=tomcat

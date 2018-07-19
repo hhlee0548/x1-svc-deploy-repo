@@ -28,14 +28,24 @@
 #  tags:
 #  - install
 
+- name: load tomcat {{ tomcat_version }} vars
+  include_vars: version_{{ tomcat_version }}.yml
+  tags:
+  - install
+  - remove
+  - start
+  - stop
+  - restart
+  - config
+
 - name: download tomcat
-  get_url: url={{ tomcat_download_url }} dest=/tmp/{{ tomcat_version }}.tar.gz
+  get_url: url={{ tomcat_download_url }} dest=/tmp/{{ tomcat_version_dir }}.tar.gz
   tags:
   - install
 
 - name: create tomcat directory 
   file:
-    path: /usr/local/tomcat/{{ tomcat_version }}
+    path: /usr/local/tomcat/{{ tomcat_version_dir }}
     state: directory
   tags:
   - install
@@ -43,8 +53,8 @@
 - name: extract archive
   unarchive:
     copy: no
-    src: /tmp/{{ tomcat_version }}.tar.gz
-    dest: /usr/local/tomcat/{{ tomcat_version }}
+    src: /tmp/{{ tomcat_version_dir }}.tar.gz
+    dest: /usr/local/tomcat/{{ tomcat_version_dir }}
     extra_opts: [--strip-components=1]
   tags:
   - install
@@ -62,7 +72,7 @@
 
 
 - name: set tomcat directory permissions
-  file: path=/usr/local/tomcat/{{ tomcat_version }} owner=tomcat group=tomcat state=directory recurse=yes
+  file: path=/usr/local/tomcat/{{ tomcat_version_dir }} owner=tomcat group=tomcat state=directory recurse=yes
   tags:
   - install
 
@@ -87,10 +97,53 @@
   tags:
   - install
 
-- name: config tomcat server
+## rsyslog start
+
+- name: enable rsyslog module
+  replace:
+    path: /etc/rsyslog.conf
+    regexp: '^#module\(load="imtcp"\)$'
+    replace: 'module(load="imtcp")'
+  tags:
+  - install
+
+- name: enable rsyslog input
+  replace:
+    path: /etc/rsyslog.conf
+    regexp: '#input\(type="imtcp" port="514"\)'
+    replace: 'input(type="imtcp" address="127.0.0.1" port="514")'
+  notify: restart-rsyslog
+  tags:
+  - install
+
+- name: install tomcat syslog lib
+  copy: src=agafua-syslog-0.3.jar dest=/usr/local/tomcat/{{ tomcat_version_dir }}/lib/
+  tags:
+  - install
+
+- name: set tomcat syslog lib to classpath
   template: 
-    src: server.xml.j2
-    dest: /usr/local/tomcat/{{ tomcat_version }}/conf/server.xml
+    src: setenv.sh.j2
+    dest: /usr/local/tomcat/{{ tomcat_version_dir }}/bin/setenv.sh
+  tags:
+  - install
+
+- name: config tomcat syslog
+  template: 
+    src: logging.properties_{{ tomcat_version }}.j2
+    dest: /usr/local/tomcat/{{ tomcat_version_dir }}/conf/logging.properties
+  notify: restart-tomcat
+  tags:
+  - install
+
+## rsyslog end
+
+
+- name: config tomcat server
+  replace:
+    path: /usr/local/tomcat/{{ tomcat_version_dir }}/conf/server.xml
+    regexp: '8080'
+    replace: '{{ http_port }}'
   notify: restart-tomcat
   tags:
   - install
@@ -98,12 +151,19 @@
 
 - name: config tomcat user
   template: 
-    src: tomcat-users.xml.j2
-    dest: /usr/local/tomcat/{{ tomcat_version }}/conf/tomcat-users.xml
+    src: tomcat-users.xml_{{ tomcat_version }}.j2
+    dest: /usr/local/tomcat/{{ tomcat_version_dir }}/conf/tomcat-users.xml
   notify: restart-tomcat
   tags:
   - install
   - config
+
+- name: start tomcat
+  become: true
+  systemd: name=tomcat state=stopped 
+  tags:
+  - start
+
 
 - name: stop tomcat
   become: true
@@ -113,7 +173,7 @@
   - remove
 
 - name: remove tomcat
-  file: path=/usr/local/tomcat/{{ tomcat_version }} state=absent
+  file: path=/usr/local/tomcat/{{ tomcat_version_dir }} state=absent
   tags:
   - remove
 

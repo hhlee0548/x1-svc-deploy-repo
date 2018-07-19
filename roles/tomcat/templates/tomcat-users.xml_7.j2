@@ -28,9 +28,9 @@
   <!.. ..> that surrounds them.
 -->
 
-<% if admin_username and admin_password is defined %>
+{% if admin_username and admin_password is defined %}
   <user username="{{ admin_username }}" password="{{ admin_password }}" roles="manager-gui" />
-<% endif %>
+{% endif %}
 
 <!--
   <role rolename="tomcat"/>
