@@ -12,10 +12,10 @@
 - War 리소스
   - App 명: "homepage" 
     - 파일 경로: /usr/local/tomcat/tomcat-7/webapps/homepage/
-    - 지정 방식: Zip 파일 직접 업로드 [ ] 릴리즈 다운로드 위치 지정 [ ]
+    - 지정 방식: War 파일 직접 업로드 [ ] 릴리즈 다운로드 위치 지정 [ ]
   - App 명: "uaa" 
     - 파일 경로: /usr/local/tomcat/tomcat-7/webapps/uaa/
-    - 지정 방식: Zip 파일 직접 업로드 [ ] 릴리즈 다운로드 위치 지정 [ ]
+    - 지정 방식: War 파일 직접 업로드 [ ] 릴리즈 다운로드 위치 지정 [ ]
 
 ## Tomcat 설정
 ```
