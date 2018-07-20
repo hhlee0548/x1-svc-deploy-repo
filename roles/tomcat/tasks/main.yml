@@ -37,6 +37,7 @@
   - stop
   - restart
   - config
+  - deploy
 
 - name: download tomcat
   get_url: url={{ tomcat_download_url }} dest=/tmp/{{ tomcat_version_dir }}.tar.gz
@@ -226,3 +227,33 @@
   tags:
   - remove
 
+
+- name: deploy war
+  get_url:
+    url: "{{ item.value.war_url }}"
+    dest: /usr/local/tomcat/{{ tomcat_version_dir }}/webapps/{{ item.value.war_name }}
+  loop: "{{ lookup('dict', resources) }}"
+  notify: restart-tomcat
+  tags:
+  - deploy
+
+# - name: install s3 pip
+#   pip:
+#     name: boto3
+#   tags:
+#   - deploy
+# 
+# - name: deploy war
+#   s3:
+#     ec2_url: 101.55.126.196:7480p
+#     bucket: cx-upload
+#     object: /examples.war
+#     #dest: /usr/local/tomcat/{{ tomcat_version_dir }}/wabapps/examples.war
+#     dest: /tmp/examples.war
+#     mode: get
+#     aws_access_key: WF1G0SNXBZW6UEUN5GBX
+#     aws_secret_key: ClUJRynGYOtVBssgAOXwt5xbiVtXVWF61CIbtpbl
+#     #ceph: true
+#   #notify: restart-tomcat
+#   tags:
+#   - deploy
