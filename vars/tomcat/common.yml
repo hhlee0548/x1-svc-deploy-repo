@@ -11,8 +11,8 @@ resources:
   location1:
     name: "homepage"
     root: /usr/local/tomcat/tomcat-7/webapps/homepage/
-    war: http://iaas-deploy-admin-bucket.101.55.126.196:7480/examples.war 
+    war_url: http://iaas-deploy-admin-bucket.101.55.126.196:7480/examples.war 
   location2:
     name: "uaa"
     root: /usr/local/tomcat/tomcat-7/webapps/uaa/
-    war: http://iaas-deploy-admin-bucket.101.55.126.196:7480/examples.war 
+    war_url: http://iaas-deploy-admin-bucket.101.55.126.196:7480/examples.war 
