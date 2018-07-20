@@ -55,11 +55,11 @@ bin/lb.sh [ install | remove | start | stop | restart | status ]
 ```
 - [Nginx 배포](docs/nginx.md)
 ```
-bin/nginx.sh [ install | remove | start | stop | restart | status ]
+bin/nginx.sh [ install | remove | start | stop | restart | status | deploy ]
 ```
 - [Tomcat 배포]
 ```
-bin/tomcat.sh [ install | remove | start | stop | restart | status ]
+bin/tomcat.sh [ install | remove | start | stop | restart | status | deploy ]
 ```
 - [Mariadb 배포]
 ```
