@@ -74,7 +74,7 @@
 
 
 - name: telegraf list nginx ports
-  set_fact: nginx_urls="{% for k, item in servers.iteritems() %}http://localhost:{% set listen = item.listen | string %}{{ listen.split(' ')[0] }}/nginx_status{% if not loop.last %},{% endif %}{% endfor %}"
+  set_fact: nginx_urls="{% for k, item in servers.iteritems() %}\"http://localhost:{% set listen = item.listen | string %}{{ listen.split(' ')[0] }}/nginx_status\"{% if not loop.last %},{% endif %}{% endfor %}"
   tags:
   - install
   - config
