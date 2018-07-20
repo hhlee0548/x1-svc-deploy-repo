@@ -9,6 +9,7 @@
 - 서버 포트: 8080
 - HTTPS 활성화: True/False
   - HTTPS Only: True/False
+    - RedirectURL: https://www.kpaasta.cloud
   - SSL 인증서: 
     - Textfield: Private Key 
     - Textfield: Public Key
