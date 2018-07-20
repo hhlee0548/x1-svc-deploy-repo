@@ -19,7 +19,7 @@
   register: apt_status
   until: apt_status|success
   delay: 5
-  retries: 24
+  retries: 48
   tags:
   - install
 
