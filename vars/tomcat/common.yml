@@ -10,9 +10,13 @@ http_port: 8084
 resources:
   location1:
     name: "homepage service"
-    war_url: http://101.55.126.196:7480/iaas-deploy-admin-bucket/examples.war 
-    war_name: "homepage.war"
+    url: http://101.55.126.196:7480/iaas-deploy-admin-bucket/examples.war 
+    location: "/homepage"
   location2:
     name: "uaa service"
-    war_url: http://101.55.126.196:7480/iaas-deploy-admin-bucket/examples.war 
-    war_name: "uaa.war"
+    url: http://101.55.126.196:7480/iaas-deploy-admin-bucket/examples.war 
+    location: "/uaa"
+  location3:
+    name: "root service"
+    url: http://101.55.126.196:7480/iaas-deploy-admin-bucket/examples.war 
+    location: "/"

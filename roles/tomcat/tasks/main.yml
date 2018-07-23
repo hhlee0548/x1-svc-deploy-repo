@@ -38,6 +38,7 @@
   - restart
   - config
   - deploy
+  - debug
 
 - name: download tomcat
   get_url: url={{ tomcat_download_url }} dest=/tmp/{{ tomcat_version_dir }}.tar.gz
@@ -227,15 +228,27 @@
   tags:
   - remove
 
+- name: debug
+  debug:
+    #msg: "{% if item.value['location'] == '/' %}ROOT.war{% else %}{{ item.value.location }} => {{ item.value.location | regex_replace('^/(.*)', '\\1.war')}}{% endif %}"
+    #msg: "{% if item.value['location'] == '/' %}ROOT.war{% else %}{{ item.value.location }} => {{ item.value.location | regex_replace('^\\/(.*)', '\\g<0>.war')}}{% endif %}"
+    msg: "{% if item.value['location'] == '/' %}ROOT{% else %}{{ item.value.location }} => {{ item.value.location | regex_replace('^\\/(.*)', '\\g<0>')}}{% endif %}.war"
+  loop: "{{ lookup('dict', resources) }}"
+  tags:
+  - debug
 
 - name: deploy war
   get_url:
-    url: "{{ item.value.war_url }}"
-    dest: /usr/local/tomcat/{{ tomcat_version_dir }}/webapps/{{ item.value.war_name }}
+    url: "{{ item.value.url }}"
+    #dest: /usr/local/tomcat/{{ tomcat_version_dir }}/webapps/{{ item.value.location }}
+    dest: /usr/local/tomcat/{{ tomcat_version_dir }}/webapps/{% if item.value.location == "/" %}ROOT{% else %}{{ item.value.location | regex_replace("^\\/(.*)$", "\\g<0>")}}{% endif %}.war
   loop: "{{ lookup('dict', resources) }}"
   notify: restart-tomcat
   tags:
   - deploy
+
+#- name: undeploy war
+  
 
 # - name: install s3 pip
 #   pip:
