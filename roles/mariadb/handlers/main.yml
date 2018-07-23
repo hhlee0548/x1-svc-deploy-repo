@@ -1,7 +1,7 @@
 - import_tasks: ../common/handlers/main.yml
 
-- name: restart-mysql
-  service: name=mysql state=restarted
+#- name: restart-mysql
+#  service: name=mysql state=restarted
 
 - name: check running mysqld process
   shell: "ps -ef | grep -v grep | grep mysqld | awk '{print $2}'"

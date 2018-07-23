@@ -44,7 +44,6 @@
   until: apt_status is success
   delay: 5
   retries: 48
-  notify: restart-mysql
   tags: install
 
 - name: create required mysql directories
@@ -66,8 +65,6 @@
   tags:
   - install
   - config
-  - start
-  - restart
 
 - name: start service
   service:
