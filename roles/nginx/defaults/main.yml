@@ -1,0 +1,4 @@
+---
+# defaults file 
+
+nginx_resource_home: /home/ubuntu/nginx 

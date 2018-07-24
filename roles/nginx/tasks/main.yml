@@ -16,12 +16,73 @@
   apt: pkg={{ item }} state=present
   with_items:
   - nginx
+  - zip
   register: apt_status
   until: apt_status is success
   delay: 5
   retries: 48
   tags:
   - install
+
+- name: debug create nginx server directories
+  debug:
+    msg: "path={{ nginx_resource_home }}/{{ item.path }}  state=directory"
+  loop: "{{ servers }}"
+  #loop: "{{ lookup('dict', servers) }}"
+  tags:
+  - debug
+
+- name: create nginx resource directories
+  file: path="{{ nginx_resource_home }}/{{ item.path }}"  state=directory
+  loop: "{{ servers }}"
+  tags:
+  - install
+  - deploy
+
+- name: debug create nginx resource directories
+  debug:
+    msg: "{{ item.1.url }} ==> {% if item.1.location == '/' %}{{ nginx_resource_home }}/{{ item.0.path }}/default/{% else %}{{ nginx_resource_home }}/{{ item.0.path }}{{ item.1.location }}{% endif %}"
+  #with_list: "{{lookup('subelements', servers, 'resources',  {'skip_missing': True}, wantlist=True )}}"
+  with_subelements:
+    - "{{ servers }}"
+    - resources
+  when: item.1.url is defined 
+  tags:
+  - debug
+
+- name: create nginx resource directories
+  file: path="{% if item.1.location == '/' %}{{ nginx_resource_home }}/{{ item.0.path }}/default/{% else %}{{ nginx_resource_home }}/{{ item.0.path }}{{ item.1.location }}{% endif %}" state=directory
+  with_subelements:
+    - "{{ servers }}"
+    - resources
+  when: item.1.url is defined 
+  tags:
+  - install
+  - deploy
+
+- name: debug deploy resources
+  debug:
+    msg: "{% if item.1.location == '/' %}{{ nginx_resource_home }}/{{ item.0.path }}/default{% else %}{{ nginx_resource_home }}/{{ item.0.path }}/{{ item.1.location | regex_replace('^\\/|\\/$', '')}}{% endif %}"
+  with_subelements:
+    - "{{ servers }}"
+    - resources
+  when: item.1.url is defined 
+  tags:
+  - debug
+   
+- name: deploy resources
+  unarchive:
+    src: "{{ item.1.url }}"
+    dest: "{% if item.1.location == '/' %}{{ nginx_resource_home }}/{{ item.0.path }}/default{% else %}{{ nginx_resource_home }}/{{ item.0.path }}/{{ item.1.location | regex_replace('^\\/|\\/$', '') }}{% endif %}/"
+    remote_src: yes
+  with_subelements:
+    - "{{ servers }}"
+    - resources
+  when: item.1.url is defined 
+  notify: restart-nginx
+  tags:
+  - install
+  - deploy
 
 - name: config site cfg
   template:
@@ -31,6 +92,7 @@
   tags:
   - install
   - config
+  - deploy
 
 - name: config syslog for access_log
   replace:
@@ -50,6 +112,16 @@
   tags:
   - install
 
+- name: remove config & resources
+  file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+  - /etc/ngin/
+  - "{{ nginx_resource_home }}"
+  tags:
+  - remove
+  
 - name: remove nginx
   apt: pkg={{ item }} state=absent purge=true
   with_items:
@@ -72,9 +144,14 @@
   tags:
   - restart
 
-
 - name: telegraf list nginx ports
-  set_fact: nginx_urls="{% for k, item in servers.iteritems() %}\"http://localhost:{% set listen = item.listen | string %}{{ listen.split(' ')[0] }}/nginx_status\"{% if not loop.last %},{% endif %}{% endfor %}"
+  debug: 
+    msg: nginx_urls="{% for item in servers %}\"http://localhost:{% set listen = item.listen | string %}{{ listen.split(' ')[0] }}/nginx_status\"{% if not loop.last %},{% endif %}{% endfor %}"
+  tags:
+  - debug
+-
+- name: telegraf list nginx ports
+  set_fact: nginx_urls="{% for item in servers %}\"http://localhost:{% set listen = item.listen | string %}{{ listen.split(' ')[0] }}/nginx_status\"{% if not loop.last %},{% endif %}{% endfor %}"
   tags:
   - install
   - config
@@ -102,4 +179,11 @@
   when: telegraf_conf.stat.exists
   tags:
   - remove
+
+- name: home dir
+  debug:
+    var: ansible_env.HOME
+  tags:
+  - debug
+
 

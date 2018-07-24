@@ -1,5 +1,6 @@
 servers:
-  server-1:
+  - name: 서비스명 설명 (Optional)
+    path: server-1
     listen: 8080 default_server
     client_max_body_size: 100M
     server_name: kpaasta.cloud www.kpaasta.cloud  portal.kpaasta.cloud
@@ -7,27 +8,42 @@ servers:
     error_page_404: /404.html
     error_page_50x: /50x.html
     resources:
-      location1:
-        location: "/"
-        root: /home/ubuntu/nginx/default/
-        index: index.html index.htm
-      location2:
-        location: "/comm/"
-        alias: /home/ubuntu/nginx/comm/
-      location3:
-        location: "/comm-api/"
-        rewrite_expression:
-          - ^/comm-api/(.*)$ /$1 break
-        proxy_pass: http://www.kpaasta.cloud:4443
-      location4:
-        location: "~ \\.php$"
-        proxy_pass: http://www.kpaasta.cloud:4443
+    - name: "root service"
+      location: "/"
+      url: http://101.55.126.196:7480/cx-upload/paasxpert.zip
+       # ==> root: /home/ubuntu/nginx/server-1/default/
+      index: index.html index.htm
 
-  server-2:
+    - name: "comm service"
+      location: "/comm/"
+      url: http://101.55.126.196:7480/cx-upload/paasxpert.zip
+      # ==> alias: /home/ubuntu/nginx/server-1/comm/
+
+    - name: "api forward"
+      location: "/comm-api/"
+      rewrite_expression:
+        - ^/comm-api/(.*)$ /$1 break
+      proxy_pass: http://www.kpaasta.cloud:4443
+
+    - name: "api forward"
+      location: "~ \\.php$"
+      proxy_pass: http://www.kpaasta.cloud:4443
+
+  - name: Service2
+    path: server-2
     listen: 8081
     server_name: kpaasta2.cloud www.kpaasta2.cloud 
     resources:
-      location1:
-        location: "/"
-        root: /home/ubuntu/nginx/default/
-        index: index.html index.htm
+    - name: "root service"
+      location: "/"
+      url: http://101.55.126.196:7480/cx-upload/paasxpert.zip
+      # ==> root: /home/ubuntu/nginx/server-2/default/
+      index: index.html index.htm
+
+    - name: "aaa service"
+      location: "/aaa/"
+      url: http://101.55.126.196:7480/cx-upload/paasxpert.zip
+      # ==> root: /home/ubuntu/nginx/server-2/default/
+
+
+
