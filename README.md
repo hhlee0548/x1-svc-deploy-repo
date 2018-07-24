@@ -49,19 +49,24 @@ ansible-playbook lb.yml \
   --extra-vars @vars/lb/common.yml \
   -t $*
 ```
-- [LB 배포]
+- LB 배포
+  - keepalived [common.yml](vars/keepalived/common.yml) | [hosts](vars/keepalived/hosts)
+  - haproxy [common.yml](vars/haproxy/common.yml) | [hosts](vars/haproxy/hosts)
 ```
 bin/lb.sh [ install | config | remove | start | stop | restart | status | info | deploy ]
 ```
-- [Nginx 배포](docs/nginx.md)
+- Nginx 배포
+  - nginx [common.yml](vars/nginx/common.yml) | [hosts](vars/nginx/hosts)  
 ```
 bin/nginx.sh [ install | config | remove | start | stop | restart | status | info | deploy ]
 ```
-- [Tomcat 배포]
+- Tomcat 배포
+  - tomcat [common.yml](vars/tomcat/common.yml) | [hosts](vars/tomcat/hosts)  
 ```
 bin/tomcat.sh [ install | config | remove | start | stop | restart | status | info | deploy ]
 ```
-- [Mariadb 배포]
+- Mariadb 배포
+  - mariadb [common.yml](vars/mariadb/common.yml) | [hosts](vars/mariadb/hosts)  
 ```
 bin/mariadb.sh [ install | config | remove | start | stop | restart | status | info ]
 ```
