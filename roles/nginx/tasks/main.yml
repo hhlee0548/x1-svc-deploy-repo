@@ -28,7 +28,6 @@
   debug:
     msg: "path={{ nginx_resource_home }}/{{ item.path }}  state=directory"
   loop: "{{ servers }}"
-  #loop: "{{ lookup('dict', servers) }}"
   tags:
   - debug
 
@@ -143,6 +142,24 @@
   systemd: name=nginx state=restarted
   tags:
   - restart
+
+- name: check service
+  shell: ps aux | grep nginx | grep -v grep | awk '{print $2}'
+  ignore_errors: yes
+  changed_when: false
+  register: service_status
+  tags:
+  - status
+
+- name: status service
+  debug: msg="nginx =>  {{ service_status.stdout != ''}}"
+  tags:
+  - status
+
+- name: info service
+  debug: msg="RESOURCE_HOME = {{ nginx_resource_home }}"
+  tags:
+  - info
 
 - name: telegraf list nginx ports
   debug: 

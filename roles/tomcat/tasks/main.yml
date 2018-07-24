@@ -39,6 +39,8 @@
   - config
   - deploy
   - debug
+  - status
+  - info
 
 - name: download tomcat
   get_url: url={{ tomcat_download_url }} dest=/tmp/{{ tomcat_version_dir }}.tar.gz
@@ -190,17 +192,32 @@
   - remove
 
 - name: start tomcat
-  become: true
   systemd: name=tomcat state=started
   tags:
   - start
 
 - name: restart tomcat
-  become: true
   systemd: name=tomcat state=restarted
   tags:
   - restart
 
+- name: check service
+  shell: ps aux | grep '{{ tomcat_version_dir }}' | grep -v grep | awk '{print $2}'
+  ignore_errors: yes
+  changed_when: false
+  register: service_status
+  tags:
+  - status
+
+- name: status service
+  debug: msg="{{ tomcat_version_dir }} =>  {{ service_status.stdout != ''}}  : {{ service_status.stdout }}"
+  tags:
+  - status
+
+- name: info service
+  debug: msg="RESOURCE_HOME = {{ tomcat_install_home }}/{{ tomcat_version_dir }}/webapps"
+  tags:
+  - info
 
 - name: telegraf add tomcat monitoring
   ini_file:

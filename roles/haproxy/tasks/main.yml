@@ -68,6 +68,27 @@
   tags:
   - restart
 
+- name: check service
+  shell: ps aux | grep haproxy | grep -v grep | awk '{print $2}'
+  ignore_errors: yes
+  changed_when: false
+  register: service_status
+  tags:
+  - status
+
+- name: status service
+  debug: msg="haproxy =>  {{ service_status.stdout != ''}}  : {{ service_status.stdout }}"
+  tags:
+  - status
+
+- name: info service
+  debug: 
+    msg: 
+      - "CONFIG_HOME = /etc/haproxy"
+      - "RESOURCE_HOME = /etc/haproxy/cert"
+  tags:
+  - info
+
 
 - name: telegraf add haproxy monitoring
   ini_file:

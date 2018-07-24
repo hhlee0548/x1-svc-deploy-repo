@@ -317,20 +317,32 @@
   shell: mysql -uroot -p{{ mysql_root_pass }} -NBe "show status where Variable_name regexp 'wsrep_cluster_status|wsrep_cluster_size|wsrep_local_state_comment|wsrep_ready'"
   register: cluster_size
   tags:
-  - install
-  - config
-  - start
-  - restart
   - status
 
-- name: display cluster size
-  debug: msg="{{ cluster_size.stdout }}"
+- name: check service
+  shell: ps aux | grep mysql | grep -v grep | awk '{print $2}'
+  ignore_errors: yes
+  changed_when: false
+  register: service_status
   tags:
-  - install
-  - config
-  - start
-  - restart
   - status
+
+- name: status service
+  debug: 
+    msg: 
+      - "mysql =>  {{ service_status.stdout != ''}} : {{ service_status.stdout }}"
+      - "cluster_status =>  {{ cluster_size.stdout != '' }} : {{ cluster_size.stdout }}"
+  tags:
+  - status
+
+- name: info service
+  debug: 
+    msg: 
+      - "CONFIG_HOME = /etc/mysql/"
+      - "DATA_HOME = /var/lib/mysql"
+  tags:
+  - info
+
 
 - name: remove mariadb
   apt: pkg={{ item.name }} state=absent purge=true

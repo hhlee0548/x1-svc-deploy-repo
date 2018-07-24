@@ -53,3 +53,35 @@
   systemd: name=keepalived state=restarted
   tags:
   - restart
+
+- name: check virutal ip
+  shell: ip a | grep "{{ virtual_ipaddress }}" | grep -v grep | awk '{print $2}'
+  ignore_errors: yes
+  changed_when: false
+  register: vip_status
+  tags:
+  - status
+
+- name: check service
+  shell: ps aux | grep keepalived | grep -v grep | awk '{print $2}'
+  ignore_errors: yes
+  changed_when: false
+  register: service_status
+  tags:
+  - status
+
+- name: status service
+  debug: 
+    msg: 
+      - "keepalived =>  {{ service_status.stdout != ''}} : {{ service_status.stdout }}"
+      - "vip_status =>  {{ vip_status.stdout != ''}} : {{ vip_status.stdout }}"
+  tags:
+  - status
+
+- name: info service
+  debug: 
+    msg: 
+      - "CONFIG_HOME = /etc/keepalived"
+  tags:
+  - info
+
