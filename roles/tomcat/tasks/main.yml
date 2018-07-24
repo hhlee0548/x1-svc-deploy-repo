@@ -210,9 +210,9 @@
     value: "{{ item.value }}"
     state: present
   with_items:
-    - { option: "url", value: "http://localhost:{{ http_port }}/manager/status/all?XML=true" }
-    - { option: "username", value: "{{ admin_username }}" }
-    - { option: "password", value: "{{ admin_password }}" }
+    - { option: "url", value: "\"http://localhost:{{ http_port }}/manager/status/all?XML=true\"" }
+    - { option: "username", value: "\"{{ admin_username }}\"" }
+    - { option: "password", value: "\"{{ admin_password }}\"" }
   notify: restart-telegraf
   when: telegraf_conf.stat.exists
   tags:
