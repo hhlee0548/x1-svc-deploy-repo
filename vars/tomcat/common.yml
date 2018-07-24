@@ -8,15 +8,13 @@ admin_password: admin
 http_port: 8084
 
 resources:
-  location1:
-    name: "homepage service"
-    url: http://101.55.126.196:7480/iaas-deploy-admin-bucket/examples.war 
-    location: "/homepage"
-  location2:
-    name: "uaa service"
-    url: http://101.55.126.196:7480/iaas-deploy-admin-bucket/examples.war 
-    location: "/uaa"
-  location3:
-    name: "root service"
-    url: http://101.55.126.196:7480/iaas-deploy-admin-bucket/examples.war 
+  - name: "root service"
     location: "/"
+    url: http://101.55.126.196:7480/iaas-deploy-admin-bucket/examples.war 
+  - name: "homepage service"
+    location: "/homepage/"
+    url: http://101.55.126.196:7480/iaas-deploy-admin-bucket/examples.war 
+  - name: "uaa service"
+    location: "/uaa/"
+    url: http://101.55.126.196:7480/iaas-deploy-admin-bucket/examples.war 
+

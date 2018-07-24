@@ -1,0 +1,4 @@
+---
+# defaults file 
+
+tomcat_install_home: /usr/local/tomcat

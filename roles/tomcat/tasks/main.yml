@@ -47,7 +47,7 @@
 
 - name: create tomcat directory 
   file:
-    path: /usr/local/tomcat/{{ tomcat_version_dir }}
+    path: "{{ tomcat_install_home }}/{{ tomcat_version_dir }}"
     state: directory
   tags:
   - install
@@ -56,7 +56,7 @@
   unarchive:
     copy: no
     src: /tmp/{{ tomcat_version_dir }}.tar.gz
-    dest: /usr/local/tomcat/{{ tomcat_version_dir }}
+    dest: "{{ tomcat_install_home }}/{{ tomcat_version_dir }}"
     extra_opts: [--strip-components=1]
   tags:
   - install
@@ -68,13 +68,13 @@
   - install
 
 - name: add user "tomcat"
-  user: name=tomcat group=tomcat home=/usr/local/tomcat createhome=no
+  user: name=tomcat group=tomcat home={{ tomcat_install_home }} createhome=no
   tags:
   - install
 
 
 - name: set tomcat directory permissions
-  file: path=/usr/local/tomcat/{{ tomcat_version_dir }} owner=tomcat group=tomcat state=directory recurse=yes
+  file: path={{ tomcat_install_home }}/{{ tomcat_version_dir }} owner=tomcat group=tomcat state=directory recurse=yes
   tags:
   - install
 
@@ -119,21 +119,21 @@
   - install
 
 - name: install tomcat syslog lib
-  copy: src=agafua-syslog-0.3.jar dest=/usr/local/tomcat/{{ tomcat_version_dir }}/lib/
+  copy: src=agafua-syslog-0.3.jar dest={{ tomcat_install_home }}/{{ tomcat_version_dir }}/lib/
   tags:
   - install
 
 - name: set tomcat syslog lib to classpath
   template: 
     src: setenv.sh.j2
-    dest: /usr/local/tomcat/{{ tomcat_version_dir }}/bin/setenv.sh
+    dest: "{{ tomcat_install_home }}/{{ tomcat_version_dir }}/bin/setenv.sh"
   tags:
   - install
 
 - name: config tomcat syslog
   template: 
     src: logging.properties_{{ tomcat_version }}.j2
-    dest: /usr/local/tomcat/{{ tomcat_version_dir }}/conf/logging.properties
+    dest: "{{ tomcat_install_home }}/{{ tomcat_version_dir }}/conf/logging.properties"
   notify: restart-tomcat
   tags:
   - install
@@ -143,7 +143,7 @@
 
 - name: config tomcat server
   replace:
-    path: /usr/local/tomcat/{{ tomcat_version_dir }}/conf/server.xml
+    path: "{{ tomcat_install_home }}/{{ tomcat_version_dir }}/conf/server.xml"
     regexp: '8080'
     replace: '{{ http_port }}'
   notify: restart-tomcat
@@ -154,7 +154,7 @@
 - name: config tomcat user
   template: 
     src: tomcat-users.xml_{{ tomcat_version }}.j2
-    dest: /usr/local/tomcat/{{ tomcat_version_dir }}/conf/tomcat-users.xml
+    dest: "{{ tomcat_install_home }}/{{ tomcat_version_dir }}/conf/tomcat-users.xml"
   notify: restart-tomcat
   tags:
   - install
@@ -175,7 +175,7 @@
   - remove
 
 - name: remove tomcat
-  file: path=/usr/local/tomcat/{{ tomcat_version_dir }} state=absent
+  file: path={{ tomcat_install_home }}/{{ tomcat_version_dir }} state=absent
   tags:
   - remove
 
@@ -230,21 +230,28 @@
 
 - name: debug
   debug:
+    msg: "{{tomcat_install_home}}"
+  tags:
+  - debug
+
+- name: debug
+  debug:
     #msg: "{% if item.value['location'] == '/' %}ROOT.war{% else %}{{ item.value.location }} => {{ item.value.location | regex_replace('^/(.*)', '\\1.war')}}{% endif %}"
     #msg: "{% if item.value['location'] == '/' %}ROOT.war{% else %}{{ item.value.location }} => {{ item.value.location | regex_replace('^\\/(.*)', '\\g<0>.war')}}{% endif %}"
-    msg: "{% if item.value['location'] == '/' %}ROOT{% else %}{{ item.value.location }} => {{ item.value.location | regex_replace('^\\/(.*)', '\\g<0>')}}{% endif %}.war"
-  loop: "{{ lookup('dict', resources) }}"
+    msg: "{% if item['location'] == '/' %}ROOT{% else %}{{ item.location }} => {{ item.location | regex_replace('^\\/|\\/$', '') }}{% endif %}.war"
+  loop: "{{ resources }}"
   tags:
   - debug
 
 - name: deploy war
   get_url:
-    url: "{{ item.value.url }}"
-    #dest: /usr/local/tomcat/{{ tomcat_version_dir }}/webapps/{{ item.value.location }}
-    dest: /usr/local/tomcat/{{ tomcat_version_dir }}/webapps/{% if item.value.location == "/" %}ROOT{% else %}{{ item.value.location | regex_replace("^\\/(.*)$", "\\g<0>")}}{% endif %}.war
-  loop: "{{ lookup('dict', resources) }}"
+    url: "{{ item.url }}"
+    #dest: {{ tomcat_install_home }}/{{ tomcat_version_dir }}/webapps/{{ item.value.location }}
+    dest: "{{ tomcat_install_home }}/{{ tomcat_version_dir }}/webapps/{% if item.location == '/' %}ROOT{% else %}{{ item.location | regex_replace('^\\/|\\/$', '') }}{% endif %}.war"
+  loop: "{{ resources }}"
   notify: restart-tomcat
   tags:
+  - install
   - deploy
 
 #- name: undeploy war
@@ -261,7 +268,7 @@
 #     ec2_url: 101.55.126.196:7480p
 #     bucket: cx-upload
 #     object: /examples.war
-#     #dest: /usr/local/tomcat/{{ tomcat_version_dir }}/wabapps/examples.war
+#     #dest: {{ tomcat_install_home }}/{{ tomcat_version_dir }}/wabapps/examples.war
 #     dest: /tmp/examples.war
 #     mode: get
 #     aws_access_key: WF1G0SNXBZW6UEUN5GBX
