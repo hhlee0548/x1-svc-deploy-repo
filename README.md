@@ -51,18 +51,25 @@ ansible-playbook lb.yml \
 ```
 - [LB 배포]
 ```
-bin/lb.sh [ install | remove | start | stop | restart | status ]
+bin/lb.sh [ install | config | remove | start | stop | restart | status ]
 ```
 - [Nginx 배포](docs/nginx.md)
 ```
-bin/nginx.sh [ install | remove | start | stop | restart | status | deploy ]
+bin/nginx.sh [ install | config | remove | start | stop | restart | status | deploy ]
 ```
 - [Tomcat 배포]
 ```
-bin/tomcat.sh [ install | remove | start | stop | restart | status | deploy ]
+bin/tomcat.sh [ install | config | remove | start | stop | restart | status | deploy ]
 ```
 - [Mariadb 배포]
 ```
-bin/mariadb.sh [ install | remove | start | stop | restart | status ]
+bin/mariadb.sh [ install | config | remove | start | stop | restart | status ]
 ```
-
+- 공통 명령
+  - install: 신규 설치
+  - config: 설정 업데이트 및 적용
+  - remove: 설치 리소스 삭제
+  - start: 서비스 시작
+  - stop: 서비스 중지
+  - restart: 서비스 재시작
+  - status: 서비스 기본 정보 및 상태
