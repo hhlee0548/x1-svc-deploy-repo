@@ -51,7 +51,7 @@ ansible-playbook lb.yml \
 ```
 - [LB 배포]
 ```
-bin/lb.sh [ install | config | remove | start | stop | restart | status | info ]
+bin/lb.sh [ install | config | remove | start | stop | restart | status | info | deploy ]
 ```
 - [Nginx 배포](docs/nginx.md)
 ```
@@ -74,4 +74,8 @@ bin/mariadb.sh [ install | config | remove | start | stop | restart | status | i
   - restart: 서비스 재시작
   - status: 서비스 프로세스 상태 및 실행 상태 정보
   - info: 서비스 설치 경로
+  - deploy: 배포
+    - haproxy: SSL 인증서 배포
+    - nginx: zip 웹리소스 배포
+    - tomcat: war 웹리소스 배포
   
