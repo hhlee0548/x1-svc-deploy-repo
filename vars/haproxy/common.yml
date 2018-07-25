@@ -5,8 +5,11 @@ monitor:
 webs:
   web-xxx:
     ssl_cert_type: self
-    ssl_cert_common_name: x1dev.crossent.com
-    ssl_cert_file: /etc/ssl/crt/web-xxx.one # user inserted cert file is put
+    #ssl_cert_common_name: x1dev.crossent.com
+    #ssl_cert_file: /etc/ssl/crt/web-xxx.one # user inserted cert file is put
+    ssl_certs:
+    - domain: x1dev.crossent.com
+      url: http://101.55.126.196:7480/cx-upload/x1dev.paasxpert.com.pem
     ssl_source_port: 443 # default: 443
     source_port: 80
     target_port: 80
@@ -19,7 +22,10 @@ webs:
 
   web-yyy:
     ssl_cert_type: user_input
-    ssl_cert_file: /etc/ssl/crt/web-yyy.one # user inserted cert file is put
+    #ssl_cert_file: /etc/ssl/crt/web-yyy.one # user inserted cert file is put
+    ssl_certs:
+    - domain: x1dev.crossent.com
+      url: http://101.55.126.196:7480/cx-upload/x1dev.paasxpert.com.pem
     ssl_source_port: 443 # default: 443
     source_port: 80
     target_port: 80
