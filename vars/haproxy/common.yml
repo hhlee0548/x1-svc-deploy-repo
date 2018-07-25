@@ -3,78 +3,80 @@ monitor:
 
 
 webs:
- -  name: web-xxx
-    ssl_cert_type: self
-    #ssl_cert_common_name: x1dev.crossent.com
-    #ssl_cert_file: /etc/ssl/crt/web-xxx.one # user inserted cert file is put
-    ssl_certs:
-    - domain: x1dev.crossent.com
-      url: http://101.55.126.196:7480/cx-upload/x1dev.paasxpert.com.pem
-    ssl_source_port: 443 # default: 443
-    source_port: 80
-    target_port: 80
-    target_ips: 
-      - 172.19.2.2
-      - 172.19.2.10
-      - 172.19.2.13
-    balance: roundrobin # default: source
-    check_inter: 5s
+- name: web-xxx
+  ssl_cert_type: self
+  #ssl_cert_common_name: x1dev.crossent.com
+  #ssl_cert_file: /etc/ssl/crt/web-xxx.one # user inserted cert file is put
+  ssl_certs:
+  - domain: x1dev.crossent.com
+    url: http://101.55.126.196:7480/cx-upload/x1dev.paasxpert.com.pem
+  - domain: x2dev.crossent.com
+    url: http://101.55.126.196:7480/cx-upload/x1dev.paasxpert.com.pem
+  ssl_source_port: 443 # default: 443
+  source_port: 80
+  target_port: 80
+  target_ips: 
+    - 172.19.2.2
+    - 172.19.2.10
+    - 172.19.2.13
+  balance: roundrobin # default: source
+  check_inter: 5s
  
- - name: web-yyy
-    ssl_cert_type: user_input
-    #ssl_cert_file: /etc/ssl/crt/web-yyy.one # user inserted cert file is put
-    ssl_certs:
-    - domain: x1dev.crossent.com
-      url: http://101.55.126.196:7480/cx-upload/x1dev.paasxpert.com.pem
-    ssl_source_port: 443 # default: 443
-    source_port: 80
-    target_port: 80
-    target_ips:
-      - 172.19.2.2
-      - 172.19.2.10
-      - 172.19.2.13
-    balance: roundrobin # default: source
-    check_inter: 5s
+- name: web-yyy
+  ssl_cert_type: user_input
+  #ssl_cert_file: /etc/ssl/crt/web-yyy.one # user inserted cert file is put
+  ssl_certs:
+  - domain: x1dev.crossent.com
+    url: http://101.55.126.196:7480/cx-upload/x1dev.paasxpert.com.pem
+  ssl_source_port: 443 # default: 443
+  source_port: 80
+  target_port: 80
+  target_ips:
+    - 172.19.2.2
+    - 172.19.2.10
+    - 172.19.2.13
+  balance: roundrobin # default: source
+  check_inter: 5s
 
 
 mariadbs:
- -  name: mariadb-xyz
-    source_port: 13306
-    target_port: 3306
-    target_ips: 
-    - 192.168.10.4
-    - 192.168.10.6
-    - 192.168.10.10
-    check_user: haproxy
-    check_inter: 3s
+- name: mariadb-xyz
+  source_port: 13306
+  target_port: 3306
+  target_ips: 
+  - 192.168.10.4
+  - 192.168.10.6
+  - 192.168.10.10
+  check_user: haproxy
+  check_inter: 3s
 
 redises:
- -  name: redis-xyz
-    source_port: 16379
-    target_port: 6379
-    target_ips: 
-    - 192.168.10.4
-    - 192.168.10.6
-    - 192.168.10.10
-    check_inter: 3s
+- name: redis-xyz
+  source_port: 16379
+  target_port: 6379
+  target_ips: 
+  - 192.168.10.4
+  - 192.168.10.6
+  - 192.168.10.10
+  check_inter: 3s
 
 apps:
- -  name: comm
-    source_port: 14443
-    target_port: 4443
-    target_ips: 
-    - 192.168.10.4
-    - 192.168.10.6
-    - 192.168.10.10
-    monitor_uri: /ping
-    check_inter: 3s
+- name: comm
+  source_port: 14443
+  target_port: 4443
+  target_ips: 
+  - 192.168.10.4
+  - 192.168.10.6
+  - 192.168.10.10
+  monitor_uri: /ping
+  check_inter: 3s
 
- -  name: api
-    source_port: 14444
-    target_port: 4444
-    target_ips:
-    - 192.168.10.4
-    - 192.168.10.6
-    - 192.168.10.10
-    monitor_uri: /ping
-    check_inter: 3s
+- name: api
+  source_port: 14444
+  target_port: 4444
+  target_ips:
+  - 192.168.10.4
+  - 192.168.10.6
+  - 192.168.10.10
+  monitor_uri: /ping
+  check_inter: 3s

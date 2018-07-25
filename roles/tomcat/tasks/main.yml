@@ -210,7 +210,7 @@
   - status
 
 - name: status service
-  debug: msg="{{ tomcat_version_dir }} =>  {{ service_status.stdout != ''}}  : {{ service_status.stdout }}"
+  debug: msg="{{ tomcat_version_dir }} =>  {{ service_status.stdout != ''}} - {{ service_status.stdout }}"
   tags:
   - status
 

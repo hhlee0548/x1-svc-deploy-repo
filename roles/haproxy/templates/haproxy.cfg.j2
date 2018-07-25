@@ -33,11 +33,12 @@ listen monitor
 
 
 {% if webs is defined %}
-{% for name, v in webs.items() %}
-listen {{ name }}
+{% for v in webs %}
+listen {{ v.name }}
     bind *:{{ v.source_port }}
 {%   if v.ssl_cert_type is defined %}	
-    bind *:{{ v.ssl_source_port | default("433") }} ssl crt /etc/haproxy/cert/{{ name }}.one
+    bind *:{{ v.ssl_source_port | default("433") }} ssl {% for ct in v.ssl_certs %} crt {{ haproxy_cert_home }}/{{ ct.domain }}.pem {% endfor %}
+
     reqadd X-Forwarded-Proto:\ https	
 {%   endif %}	
     option forwardfor
@@ -52,8 +53,8 @@ listen {{ name }}
 
 
 {% if mariadbs is defined %}
-{% for name, v in mariadbs.items() %}
-listen {{ name }}
+{% for v in mariadbs %}
+listen {{ v.name }}
     bind *:{{ v.source_port }}
     balance source
     mode tcp
@@ -72,8 +73,8 @@ listen {{ name }}
 
 
 {% if redises is defined %}
-{% for name, v in redises.items() %}
-listen {{ name }}
+{% for v in redises %}
+listen {{ v.name }}
     bind *:{{ v.source_port }}
     option tcp-check
     tcp-check connect
@@ -91,8 +92,8 @@ listen {{ name }}
 
 
 {% if apps is defined %}
-{% for name, v in apps.items() %}
-listen {{ name }}
+{% for v in apps %}
+listen {{ v.name }}
     bind *:{{ v.source_port }}
     mode http
     monitor-uri   {{ v.monitor_uri }}

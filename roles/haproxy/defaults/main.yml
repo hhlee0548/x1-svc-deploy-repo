@@ -1,0 +1,4 @@
+---
+# defaults file 
+
+haproxy_cert_home: /etc/haproxy/cert

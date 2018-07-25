@@ -13,7 +13,6 @@
     state: directory
   tags:
   - install
-  - cert
 
 - name: copy certificate to remote hosts
   copy:
@@ -26,7 +25,29 @@
   with_dict: "{{ webs | default({}) }}"
   tags:
   - install
-  - cert
+
+- name: debug deploy certs
+  debug: 
+    msg: "{{ item.1.url }}  ==> dest: {{ haproxy_cert_home }}/{{ item.1.domain }}.pem"
+  with_subelements:
+    - "{{ webs }}"
+    - ssl_certs
+  when: item.1.url is defined and item.1.domain is defined
+  tags:
+  - debug
+
+- name: deploy certs
+  get_url:
+    url: "{{ item.1.url }}"
+    dest: "{{ haproxy_cert_home }}/{{ item.1.domain }}.pem"
+  with_subelements:
+    - "{{ webs }}"
+    - ssl_certs
+  when: item.1.url is defined and item.1.domain is defined
+  tags:
+  - install
+  - config
+  - deploy
 
 - name: config haproxy.cfg
   template: 
@@ -77,7 +98,7 @@
   - status
 
 - name: status service
-  debug: msg="haproxy =>  {{ service_status.stdout != ''}}  : {{ service_status.stdout }}"
+  debug: msg="haproxy =>  {{ service_status.stdout != ''}} - {{ service_status.stdout }}"
   tags:
   - status
 
@@ -113,4 +134,6 @@
   when: telegraf_conf.stat.exists
   tags:
   - remove
+
+
 

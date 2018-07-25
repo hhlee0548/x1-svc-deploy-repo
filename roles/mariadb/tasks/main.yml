@@ -330,8 +330,8 @@
 - name: status service
   debug: 
     msg: 
-      - "mysql =>  {{ service_status.stdout != ''}} : {{ service_status.stdout }}"
-      - "cluster_status =>  {{ cluster_size.stdout != '' }} : {{ cluster_size.stdout }}"
+      - "mysql =>  {{ service_status.stdout != ''}} - {{ service_status.stdout }}"
+      - "cluster_status =>  {{ cluster_size.stdout != '' }} - {{ cluster_size.stdout }}"
   tags:
   - status
 
