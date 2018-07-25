@@ -119,3 +119,41 @@ apps:
     monitor_uri: /ping
     check_inter: 3s
 ```    
+- 배포 형상
+```
+listen iaas
+    bind *:4444
+    balance source
+    mode http
+    monitor-uri   /swagger-ui.html
+    server api1 172.19.2.11:4444 check inter 3s
+    server api2 172.19.2.19:4444 check inter 3s
+    server api3 172.19.2.6:4444 check inter 3s
+    server 10.0.0.x:80 10.0.0.x:80 maxconn 25 check inter 5s rise 3 fall 2
+    
+frontend www
+    bind *:80
+    option httplog
+    #option httpclose
+    mode http
+    log /dev/log local0 debug
+
+    acl xxx hdr(Host) -i xxx.com
+    acl yyy hdr(Host) -i yyy.com
+
+    use_backend xxxcom if xxx
+    use_backend yyycom if yyy
+
+    default_backend xxxcom
+
+backend xxxcom
+    #option httpclose
+    mode http
+    server app_1 192.168.10.4:8080 check
+
+backend yyycom
+    #option httpclose
+    mode http
+    server app_2 192.168.10.4:8081 check
+    
+```
