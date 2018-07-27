@@ -1,6 +1,6 @@
 java_package: openjdk-8-jdk  #openjdk-7-jdk
 
-tomcat_version: 7  #7, 9
+tomcat_version: 7  #7, 8
 tomcat_memory_ms: 512M
 tomcat_memory_mx: 1024M
 # Display 가능, 수정 가능
@@ -13,11 +13,14 @@ resources:
   - name: "root service"
     location: "/"
     url: http://101.55.126.196:7480/iaas-deploy-admin-bucket/examples.war 
+    # => /usr/local/tomcat/tomcat-7/webapps/ROOT/
   - name: "homepage service"
     location: "/homepage/"
     url: http://101.55.126.196:7480/iaas-deploy-admin-bucket/examples.war 
+    # => /usr/local/tomcat/tomcat-7/webapps/homepage/    
   - name: "uaa service"
     # 2 Depth 지원하지 않음 (예: /uaa/abc/ 입력 불가)
     location: "/uaa/"  
     url: http://101.55.126.196:7480/iaas-deploy-admin-bucket/examples.war 
+    # => /usr/local/tomcat/tomcat-7/webapps/uaa/   
 
