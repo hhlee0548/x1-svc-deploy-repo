@@ -15,6 +15,7 @@ servers:
       index: index.html index.htm
 
     - name: "comm service"
+      # 2 Depth 지원하지 않음(예: /comm/abc/)
       location: "/comm/"
       url: http://101.55.126.196:7480/cx-upload/paasxpert.zip
       # ==> alias: /home/ubuntu/nginx/server-1/comm/
