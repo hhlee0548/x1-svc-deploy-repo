@@ -2,7 +2,9 @@
 #mariadb2
 cluster_name: wsrep_cluster_xxx
 #mysql_master_node: mariadb2
+# 수정불가 Display(*** / 보기)
 mysql_root_pass: "password"
+# 랜덤 패스워드 생성 Display No
 sstuser_pass: "password"
 
 # Default config: can be updated
