@@ -45,7 +45,7 @@
     - ssl_certs
   when: item.1.url is defined and item.1.domain is defined
   tags:
-  - install
+  #- install
   - config
   - deploy
 
