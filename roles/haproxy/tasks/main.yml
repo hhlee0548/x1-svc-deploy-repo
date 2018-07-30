@@ -14,17 +14,17 @@
   tags:
   - install
 
-- name: copy certificate to remote hosts
-  copy:
-    src: "{{ item.value.ssl_cert_file }}"    
-    dest: /etc/haproxy/cert/{{ item.key }}.one
-    owner: haproxy
-    group: haproxy
-    mode: 0644
-    backup: yes
-  with_dict: "{{ webs | default({}) }}"
-  tags:
-  - install
+#- name: copy certificate to remote hosts
+#  copy:
+#    src: "{{ item.value.ssl_cert_file }}"    
+#    dest: /etc/haproxy/cert/{{ item.key }}.one
+#    owner: haproxy
+#    group: haproxy
+#    mode: 0644
+#    backup: yes
+#  with_dict: "{{ webs | default({}) }}"
+#  tags:
+#  - install
 
 - name: debug deploy certs
   debug: 
