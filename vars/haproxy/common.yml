@@ -38,6 +38,17 @@ webs:
   balance: roundrobin # default: source
   check_inter: 5s
 
+- name: web-zzz
+  source_port: 80
+  target_port: 80
+  target_ips:
+    - 172.19.2.2
+    - 172.19.2.10
+    - 172.19.2.13
+  balance: roundrobin # default: source
+  check_inter: 5s
+
+
 
 mariadbs:
 - name: mariadb-xyz

@@ -31,7 +31,9 @@
     msg: "{{ item.1.url }}  ==> dest: {{ haproxy_cert_home }}/{{ item.1.domain }}.pem"
   with_subelements:
     - "{{ webs }}"
-    - ssl_certs
+    - ssl_certs 
+    - flags:
+      skip_missing: true
   when: item.1.url is defined and item.1.domain is defined
   tags:
   - debug
@@ -42,10 +44,12 @@
     dest: "{{ haproxy_cert_home }}/{{ item.1.domain }}.pem"
   with_subelements:
     - "{{ webs }}"
-    - ssl_certs
+    - ssl_certs 
+    - flags:
+      skip_missing: true
   when: item.1.url is defined and item.1.domain is defined
   tags:
-  #- install
+  - install
   - config
   - deploy
 
