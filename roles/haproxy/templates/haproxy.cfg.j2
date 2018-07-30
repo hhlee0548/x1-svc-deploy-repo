@@ -36,7 +36,7 @@ listen monitor
 {% for v in webs %}
 listen {{ v.name }}
     bind *:{{ v.source_port }}
-{%   if v.ssl_cert_type is defined %}	
+{%   if v.ssl_cert_type is defined and v.ssl_certs is defined %}	
     bind *:{{ v.ssl_source_port | default("433") }} ssl {% for ct in v.ssl_certs %} crt {{ haproxy_cert_home }}/{{ ct.domain }}.pem {% endfor %}
 
     reqadd X-Forwarded-Proto:\ https	
