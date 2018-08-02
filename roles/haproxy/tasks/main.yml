@@ -47,7 +47,7 @@
     - ssl_certs 
     - flags:
       skip_missing: true
-  when: item.1.url is defined and item.1.domain is defined
+  when: webs is defined and item.1.url is defined and item.1.domain is defined
   tags:
   - install
   - config
