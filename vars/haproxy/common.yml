@@ -38,6 +38,19 @@ webs:
   balance: roundrobin # default: source
   check_inter: 5s
 
+- name: web-abc
+  ssl_cert_type: user_input
+  ssl_certs:
+  - domain: x1dev.crossent.com
+    url: http://101.55.126.196:7480/cx-upload/x1dev.paasxpert.com.pem
+  ssl_source_port: 8443 # default: 443
+  target_port: 8081
+  target_ips:
+    - 192.168.10.4
+  balance: roundrobin # default: source
+  check_inter: 5s
+
+
 - name: web-zzz
   source_port: 80
   target_port: 80

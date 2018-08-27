@@ -1,0 +1,308 @@
+- import_tasks: ../common/tasks/main.yml
+
+- name: remove lock files
+  file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+  - /var/lib/dpkg/updates/*
+  - /var/lib/apt/lists/lock
+  - /var/cache/apt/archives/lock
+  - /var/lib/dpkg/lock 
+  tags:
+  - install
+
+- name: install openjdk
+  apt: pkg={{ java_package }} state=present
+  register: apt_status
+  until: apt_status is success
+  delay: 5
+  retries: 48
+  tags:
+  - step
+  - install
+
+#- name: install tomcat
+#  apt: pkg={{ item }} state=latest
+#  with_items:
+#    - tomcat7
+#  tags:
+#  - install
+
+- name: load tomcat {{ tomcat_version }} vars
+  include_vars: version_{{ tomcat_version }}.yml
+  tags:
+  - install
+  - remove
+  - start
+  - stop
+  - restart
+  - config
+  - deploy
+  - debug
+  - status
+  - info
+
+- name: download tomcat
+  get_url: url={{ tomcat_download_url }} dest=/tmp/{{ tomcat_version_dir }}.tar.gz
+  tags:
+  - install
+
+- name: create tomcat directory 
+  file:
+    path: "{{ tomcat_install_home }}/{{ item.tomcat_dir }}"
+    state: directory
+  loop: "{{ servers }}"
+  tags:
+  - install
+
+- name: extract archive
+  unarchive:
+    copy: no
+    src: /tmp/{{ tomcat_version_dir }}.tar.gz
+    dest: "{{ tomcat_install_home }}/{{ item.tomcat_dir }}"
+    extra_opts: [--strip-components=1]
+  loop: "{{ servers }}"
+  tags:
+  - install
+
+
+- name: add group "tomcat"
+  group: name=tomcat
+  tags:
+  - install
+
+- name: add user "tomcat"
+  user: name=tomcat group=tomcat home={{ tomcat_install_home }} createhome=no
+  tags:
+  - install
+
+
+- name: set tomcat directory permissions
+  file: path={{ tomcat_install_home }}/{{ item.tomcat_dir }} owner=tomcat group=tomcat state=directory recurse=yes
+  loop: "{{ servers }}"
+  tags:
+  - install
+
+#- name: install tomcat init script
+#  copy: src=tomcat-initscript.sh dest=/etc/init.d/tomcat mode=0755
+#  tags:
+#  - install
+
+- name: install tomcat init script
+  template: 
+    src: tomcat.service.j2
+    dest: /etc/systemd/system/tomcat_{{ item.tomcat_dir }}.service
+  loop: "{{ servers }}"
+  tags:
+  - install
+
+- name: enable tomcat services 
+  become: true
+  systemd:
+    daemon_reload: yes
+    name: tomcat_{{ item.tomcat_dir }}
+    enabled: yes
+  loop: "{{ servers }}"
+  tags:
+  - install
+
+## rsyslog start
+
+- name: enable rsyslog module
+  replace:
+    path: /etc/rsyslog.conf
+    regexp: '^#module\(load="imtcp"\)$'
+    replace: 'module(load="imtcp")'
+  tags:
+  - install
+
+- name: enable rsyslog input
+  replace:
+    path: /etc/rsyslog.conf
+    regexp: '#input\(type="imtcp" port="514"\)'
+    replace: 'input(type="imtcp" address="127.0.0.1" port="514")'
+  notify: restart-rsyslog
+  tags:
+  - install
+
+- name: install tomcat syslog lib
+  copy: src=agafua-syslog-0.3.jar dest={{ tomcat_install_home }}/{{ item.tomcat_dir }}/lib/
+  loop: "{{ servers }}"
+  tags:
+  - install
+
+- name: set tomcat syslog lib to classpath
+  template: 
+    src: setenv.sh.j2
+    dest: "{{ tomcat_install_home }}/{{ item.tomcat_dir }}/bin/setenv.sh"
+  loop: "{{ servers }}"
+  tags:
+  - install
+
+- name: config tomcat syslog
+  template: 
+    src: logging.properties_{{ tomcat_version }}.j2
+    dest: "{{ tomcat_install_home }}/{{ item.tomcat_dir }}/conf/logging.properties"
+  loop: "{{ servers }}"
+  notify: restart-tomcat
+  tags:
+  - install
+
+## rsyslog end
+- name: config tomcat server
+  replace:
+    path: "{{ tomcat_install_home }}/{{ item.tomcat_dir }}/conf/server.xml"
+    regexp: '8080'
+    replace: '{{ item.http_port }}'
+  loop: "{{ servers }}"
+  notify: restart-tomcat
+  tags:
+  - install
+  - config
+
+- name: config tomcat user
+  template: 
+    src: tomcat-users.xml_{{ tomcat_version }}.j2
+    dest: "{{ tomcat_install_home }}/{{ item.tomcat_dir }}/conf/tomcat-users.xml"
+  loop: "{{ servers }}"
+  notify: restart-tomcat
+  tags:
+  - install
+  - config
+
+- name: start tomcat
+  systemd: name=tomcat_{{ item.tomcat_dir }} state=started 
+  loop: "{{ servers }}"
+  tags:
+  - start
+
+
+- name: stop tomcat
+  become: true
+  systemd: name=tomcat_{{ item.tomcat_dir }} state=stopped 
+  loop: "{{ servers }}"
+  tags:
+  - stop
+  - remove
+
+- name: remove tomcat
+  file: path={{ tomcat_install_home }}/{{ item.tomcat_dir }} state=absent
+  loop: "{{ servers }}"
+  tags:
+  - remove
+
+- name: remove tomcat user
+  user: name=tomcat state=absent
+  tags:
+  - remove
+
+- name: remove tomcat group
+  group: name=tomcat state=absent
+  tags:
+  - remove
+
+- name: restart tomcat
+  systemd: name=tomcat_{{ item.tomcat_dir }} state=restarted 
+  loop: "{{ servers }}"
+  tags:
+  - restart
+
+- name: check service
+  shell: ps aux | grep 'tomcat' | grep -v grep | grep -v tail | awk '{print $2}'
+  ignore_errors: yes
+  changed_when: false
+  register: service_status
+  tags:
+  - status
+
+- name: status service
+  debug: msg="tomcat =>  {{ service_status.stdout != ''}} - {{ service_status.stdout }}"
+  tags:
+  - status
+
+- name: info service
+  debug: msg="RESOURCE_HOME = {{ tomcat_install_home }}/{{ item.tomcat_dir }}/webapps"
+  loop: "{{ servers }}"
+  tags:
+  - info
+
+#/// Todo
+#- name: telegraf add tomcat monitoring
+#  ini_file:
+#    path: /etc/telegraf/telegraf.conf
+#    section: "[inputs.tomcat]"
+#    option: "{{ item.option }}"
+#    value: "{{ item.1.value }}"
+#    state: present
+#  with_items:
+#    - { option: "url", value: "\"http://localhost:{{ http_port }}/manager/status/all?XML=true\"" }
+#    - { option: "username", value: "\"{{ admin_username }}\"" }
+#    - { option: "password", value: "\"{{ admin_password }}\"" }
+#  loop: "{{ servers }}"
+#  notify: restart-telegraf
+#  when: telegraf_conf.stat.exists
+#  tags:
+#  - install
+#  - config
+
+#- name: telegraf remove tomcat monitoring
+#  ini_file:
+#    path: /etc/telegraf/telegraf.conf
+#    section: "[inputs.tomcat]"
+#    state: absent
+#  when: telegraf_conf.stat.exists
+#  tags:
+#  - remove
+
+- name: debug
+  debug:
+    msg: "{{ tomcat_install_home}} => {{ tomcat_version }}.yml" 
+  tags:
+  - debug
+
+- name: debug
+  debug:
+    msg: "{% if item.1.location == '/' %}ROOT{% else %}{{ item.1.location }} => {{ item.1.location | regex_replace('^\\/|\\/$', '') }}{% endif %}.war"
+  with_subelements: 
+  - "{{ servers }}"
+  - resources
+  tags:
+  - debug
+
+- name: deploy war
+  get_url:
+    url: "{{ item.1.url }}"
+    #dest: {{ tomcat_install_home }}/{{ tomcat_version_dir }}/webapps/{{ item.value.location }}
+    dest: "{{ tomcat_install_home }}/{{ item.0.tomcat_dir }}/webapps/{{item.1.location}}/{% if item.1.location == '/' %}ROOT{% else %}{{ item.1.location | regex_replace('^\\/|\\/$', '') }}{% endif %}.war"
+  with_subelements: 
+  - "{{ servers }}"
+  - resources
+  notify: restart-tomcat
+  tags:
+  - install
+  - deploy
+
+#- name: undeploy war
+  
+
+# - name: install s3 pip
+#   pip:
+#     name: boto3
+#   tags:
+#   - deploy
+# 
+# - name: deploy war
+#   s3:
+#     ec2_url: 101.55.126.196:7480p
+#     bucket: cx-upload
+#     object: /examples.war
+#     #dest: {{ tomcat_install_home }}/{{ tomcat_version_dir }}/wabapps/examples.war
+#     dest: /tmp/examples.war
+#     mode: get
+#     aws_access_key: WF1G0SNXBZW6UEUN5GBX
+#     aws_secret_key: ClUJRynGYOtVBssgAOXwt5xbiVtXVWF61CIbtpbl
+#     #ceph: true
+#   #notify: restart-tomcat
+#   tags:
+#   - deploy

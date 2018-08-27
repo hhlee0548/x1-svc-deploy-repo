@@ -1,0 +1,6 @@
+- import_tasks: ../common/handlers/main.yml
+
+- name: restart-tomcat
+  systemd: name=tomcat_{{ item.tomcat_dir }} state=restarted
+  loop: "{{ servers }}"
+
