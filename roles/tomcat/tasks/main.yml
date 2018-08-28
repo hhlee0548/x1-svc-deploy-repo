@@ -228,32 +228,75 @@
   - info
 
 #/// Todo
-#- name: telegraf add tomcat monitoring
-#  ini_file:
-#    path: /etc/telegraf/telegraf.conf
-#    section: "[inputs.tomcat]"
-#    option: "{{ item.option }}"
-#    value: "{{ item.1.value }}"
-#    state: present
-#  with_items:
-#    - { option: "url", value: "\"http://localhost:{{ http_port }}/manager/status/all?XML=true\"" }
-#    - { option: "username", value: "\"{{ admin_username }}\"" }
-#    - { option: "password", value: "\"{{ admin_password }}\"" }
-#  loop: "{{ servers }}"
-#  notify: restart-telegraf
-#  when: telegraf_conf.stat.exists
-#  tags:
-#  - install
-#  - config
+# telegraf_conf: 
+# - server: 8080
+#   - { option: "url", value: "\"http://localhost:{{ http_port }}/manager/status/all?XML=true\"" }
+#   - { option: "username", value: "\"{{ admin_username }}\"" }
+#   - { option: "password", value: "\"{{ admin_password }}\"" }
+# - server: 8081
+#   - { option: "url", value: "\"http://localhost:{{ http_port }}/manager/status/all?XML=true\"" }
+#   - { option: "username", value: "\"{{ admin_username }}\"" }
+#   - { option: "password", value: "\"{{ admin_password }}\"" }
 
-#- name: telegraf remove tomcat monitoring
-#  ini_file:
-#    path: /etc/telegraf/telegraf.conf
-#    section: "[inputs.tomcat]"
-#    state: absent
-#  when: telegraf_conf.stat.exists
-#  tags:
-#  - remove
+- name: add tomcat monitoring on telegraf - url
+  ini_file:
+    path: /etc/telegraf/telegraf.conf
+    section: "[inputs.tomcat{%for i in range(idx) %} {% endfor %}]"
+    option: "url"
+    value: "\"http://localhost:{{ item.http_port }}/manager/status/all?XML=true\""
+    state: present
+  loop: "{{ servers }}"
+  loop_control:
+    index_var: idx
+  notify: restart-telegraf
+  when: telegraf_conf.stat.exists
+  tags:
+  - install
+  - config
+
+- name: add tomcat monitoring on telegraf - username
+  ini_file:
+    path: /etc/telegraf/telegraf.conf
+    section: "[inputs.tomcat{%for i in range(idx) %} {% endfor %}]"
+    option: "username"
+    value: "\"{{ admin_username }}\""
+    state: present
+  loop: "{{ servers }}"
+  loop_control:
+    index_var: idx
+  notify: restart-telegraf
+  when: telegraf_conf.stat.exists
+  tags:
+  - install
+  - config
+
+- name: add tomcat monitoring on telegraf - password
+  ini_file:
+    path: /etc/telegraf/telegraf.conf
+    section: "[inputs.tomcat{%for i in range(idx) %} {% endfor %}]"
+    option: "password"
+    value: "\"{{ admin_password }}\""
+    state: present
+  loop: "{{ servers }}"
+  loop_control:
+    index_var: idx
+  notify: restart-telegraf
+  when: telegraf_conf.stat.exists
+  tags:
+  - install
+  - config
+
+- name: telegraf remove tomcat monitoring
+  ini_file:
+    path: /etc/telegraf/telegraf.conf
+    section: "[inputs.tomcat{%for i in range(idx) %} {% endfor %}]"
+    state: absent
+  when: telegraf_conf.stat.exists
+  loop: "{{ servers }}"
+  loop_control:
+    index_var: idx
+  tags:
+  - remove
 
 - name: debug
   debug:
