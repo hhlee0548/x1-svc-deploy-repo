@@ -1,2 +1,2 @@
 #!/bin/bash
-CLASSPATH="${CLASSPATH}:/usr/local/tomcat/{{ tomcat_version_dir }}/lib/agafua-syslog-0.3.jar"
+CLASSPATH="${CLASSPATH}:{{ tomcat_install_home }}/{{ item.tomcat_dir }}/lib/agafua-syslog-0.3.jar"

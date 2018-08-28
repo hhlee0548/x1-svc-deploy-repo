@@ -1,6 +1,6 @@
-- name: Deploy Tomcats
+- name: Deploy Tomcat
   hosts: tomcat
   become: true
   roles:
-  - tomcat-group
+  - tomcat-single
 

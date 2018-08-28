@@ -4,9 +4,9 @@ if [[ "$1" == "" || "$1" != "install" && "$1" != "config" && "$1" != "remove" &&
 fi
 
 
-ansible-playbook tomcat-group.yml \
+ansible-playbook tomcat-single.yml \
   -e 'ansible_python_interpreter=/usr/bin/python3' \
-  -i vars/tomcat-group/hosts \
+  -i vars/tomcat-single/hosts \
   --key-file=~/.ssh/id_rsa \
-  --extra-vars @vars/tomcat-group/common.yml \
+  --extra-vars @vars/tomcat-single/common.yml \
   -t $* 

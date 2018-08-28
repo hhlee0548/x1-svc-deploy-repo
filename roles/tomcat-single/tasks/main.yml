@@ -19,7 +19,6 @@
   delay: 5
   retries: 48
   tags:
-  - step
   - install
 
 #- name: install tomcat
@@ -50,9 +49,8 @@
 
 - name: create tomcat directory 
   file:
-    path: "{{ tomcat_install_home }}/{{ item.tomcat_dir }}"
+    path: "{{ tomcat_install_home }}/{{ tomcat_version_dir }}"
     state: directory
-  loop: "{{ servers }}"
   tags:
   - install
 
@@ -60,9 +58,8 @@
   unarchive:
     copy: no
     src: /tmp/{{ tomcat_version_dir }}.tar.gz
-    dest: "{{ tomcat_install_home }}/{{ item.tomcat_dir }}"
+    dest: "{{ tomcat_install_home }}/{{ tomcat_version_dir }}"
     extra_opts: [--strip-components=1]
-  loop: "{{ servers }}"
   tags:
   - install
 
@@ -79,8 +76,7 @@
 
 
 - name: set tomcat directory permissions
-  file: path={{ tomcat_install_home }}/{{ item.tomcat_dir }} owner=tomcat group=tomcat state=directory recurse=yes
-  loop: "{{ servers }}"
+  file: path={{ tomcat_install_home }}/{{ tomcat_version_dir }} owner=tomcat group=tomcat state=directory recurse=yes
   tags:
   - install
 
@@ -92,18 +88,16 @@
 - name: install tomcat init script
   template: 
     src: tomcat.service.j2
-    dest: /etc/systemd/system/tomcat_{{ item.tomcat_dir }}.service
-  loop: "{{ servers }}"
+    dest: /etc/systemd/system/tomcat.service 
   tags:
   - install
 
-- name: enable tomcat services 
+- name: enable tomcat service 
   become: true
   systemd:
     daemon_reload: yes
-    name: tomcat_{{ item.tomcat_dir }}
+    name: tomcat
     enabled: yes
-  loop: "{{ servers }}"
   tags:
   - install
 
@@ -127,35 +121,33 @@
   - install
 
 - name: install tomcat syslog lib
-  copy: src=agafua-syslog-0.3.jar dest={{ tomcat_install_home }}/{{ item.tomcat_dir }}/lib/
-  loop: "{{ servers }}"
+  copy: src=agafua-syslog-0.3.jar dest={{ tomcat_install_home }}/{{ tomcat_version_dir }}/lib/
   tags:
   - install
 
 - name: set tomcat syslog lib to classpath
   template: 
     src: setenv.sh.j2
-    dest: "{{ tomcat_install_home }}/{{ item.tomcat_dir }}/bin/setenv.sh"
-  loop: "{{ servers }}"
+    dest: "{{ tomcat_install_home }}/{{ tomcat_version_dir }}/bin/setenv.sh"
   tags:
   - install
 
 - name: config tomcat syslog
   template: 
     src: logging.properties_{{ tomcat_version }}.j2
-    dest: "{{ tomcat_install_home }}/{{ item.tomcat_dir }}/conf/logging.properties"
-  loop: "{{ servers }}"
+    dest: "{{ tomcat_install_home }}/{{ tomcat_version_dir }}/conf/logging.properties"
   notify: restart-tomcat
   tags:
   - install
 
 ## rsyslog end
+
+
 - name: config tomcat server
   replace:
-    path: "{{ tomcat_install_home }}/{{ item.tomcat_dir }}/conf/server.xml"
+    path: "{{ tomcat_install_home }}/{{ tomcat_version_dir }}/conf/server.xml"
     regexp: '8080'
-    replace: '{{ item.http_port }}'
-  loop: "{{ servers }}"
+    replace: '{{ http_port }}'
   notify: restart-tomcat
   tags:
   - install
@@ -164,31 +156,28 @@
 - name: config tomcat user
   template: 
     src: tomcat-users.xml_{{ tomcat_version }}.j2
-    dest: "{{ tomcat_install_home }}/{{ item.tomcat_dir }}/conf/tomcat-users.xml"
-  loop: "{{ servers }}"
+    dest: "{{ tomcat_install_home }}/{{ tomcat_version_dir }}/conf/tomcat-users.xml"
   notify: restart-tomcat
   tags:
   - install
   - config
 
 - name: start tomcat
-  systemd: name=tomcat_{{ item.tomcat_dir }} state=started 
-  loop: "{{ servers }}"
+  become: true
+  systemd: name=tomcat state=stopped 
   tags:
   - start
 
 
 - name: stop tomcat
   become: true
-  systemd: name=tomcat_{{ item.tomcat_dir }} state=stopped 
-  loop: "{{ servers }}"
+  systemd: name=tomcat state=stopped 
   tags:
   - stop
   - remove
 
 - name: remove tomcat
-  file: path={{ tomcat_install_home }}/{{ item.tomcat_dir }} state=absent
-  loop: "{{ servers }}"
+  file: path={{ tomcat_install_home }}/{{ tomcat_version_dir }} state=absent
   tags:
   - remove
 
@@ -202,14 +191,18 @@
   tags:
   - remove
 
+- name: start tomcat
+  systemd: name=tomcat state=started
+  tags:
+  - start
+
 - name: restart tomcat
-  systemd: name=tomcat_{{ item.tomcat_dir }} state=restarted 
-  loop: "{{ servers }}"
+  systemd: name=tomcat state=restarted
   tags:
   - restart
 
 - name: check service
-  shell: ps aux | grep 'tomcat' | grep -v grep | grep -v tail | awk '{print $2}'
+  shell: ps aux | grep '{{ tomcat_version_dir }}' | grep -v grep | awk '{print $2}'
   ignore_errors: yes
   changed_when: false
   register: service_status
@@ -217,67 +210,62 @@
   - status
 
 - name: status service
-  debug: msg="tomcat =>  {{ service_status.stdout != ''}} - {{ service_status.stdout }}"
+  debug: msg="{{ tomcat_version_dir }} =>  {{ service_status.stdout != ''}} - {{ service_status.stdout }}"
   tags:
   - status
 
 - name: info service
-  debug: msg="RESOURCE_HOME = {{ tomcat_install_home }}/{{ item.tomcat_dir }}/webapps"
-  loop: "{{ servers }}"
+  debug: msg="RESOURCE_HOME = {{ tomcat_install_home }}/{{ tomcat_version_dir }}/webapps"
   tags:
   - info
 
-#/// Todo
-#- name: telegraf add tomcat monitoring
-#  ini_file:
-#    path: /etc/telegraf/telegraf.conf
-#    section: "[inputs.tomcat]"
-#    option: "{{ item.option }}"
-#    value: "{{ item.1.value }}"
-#    state: present
-#  with_items:
-#    - { option: "url", value: "\"http://localhost:{{ http_port }}/manager/status/all?XML=true\"" }
-#    - { option: "username", value: "\"{{ admin_username }}\"" }
-#    - { option: "password", value: "\"{{ admin_password }}\"" }
-#  loop: "{{ servers }}"
-#  notify: restart-telegraf
-#  when: telegraf_conf.stat.exists
-#  tags:
-#  - install
-#  - config
+- name: telegraf add tomcat monitoring
+  ini_file:
+    path: /etc/telegraf/telegraf.conf
+    section: "[inputs.tomcat]"
+    option: "{{ item.option }}"
+    value: "{{ item.value }}"
+    state: present
+  with_items:
+    - { option: "url", value: "\"http://localhost:{{ http_port }}/manager/status/all?XML=true\"" }
+    - { option: "username", value: "\"{{ admin_username }}\"" }
+    - { option: "password", value: "\"{{ admin_password }}\"" }
+  notify: restart-telegraf
+  when: telegraf_conf.stat.exists
+  tags:
+  - install
+  - config
 
-#- name: telegraf remove tomcat monitoring
-#  ini_file:
-#    path: /etc/telegraf/telegraf.conf
-#    section: "[inputs.tomcat]"
-#    state: absent
-#  when: telegraf_conf.stat.exists
-#  tags:
-#  - remove
+- name: telegraf remove tomcat monitoring
+  ini_file:
+    path: /etc/telegraf/telegraf.conf
+    section: "[inputs.tomcat]"
+    state: absent
+  when: telegraf_conf.stat.exists
+  tags:
+  - remove
 
 - name: debug
   debug:
-    msg: "{{ tomcat_install_home}} => {{ tomcat_version }}.yml" 
+    msg: "{{tomcat_install_home}}"
   tags:
   - debug
 
 - name: debug
   debug:
-    msg: "{% if item.1.location == '/' %}ROOT{% else %}{{ item.1.location }} => {{ item.1.location | regex_replace('^\\/|\\/$', '') }}{% endif %}.war"
-  with_subelements: 
-  - "{{ servers }}"
-  - resources
+    #msg: "{% if item.value['location'] == '/' %}ROOT.war{% else %}{{ item.value.location }} => {{ item.value.location | regex_replace('^/(.*)', '\\1.war')}}{% endif %}"
+    #msg: "{% if item.value['location'] == '/' %}ROOT.war{% else %}{{ item.value.location }} => {{ item.value.location | regex_replace('^\\/(.*)', '\\g<0>.war')}}{% endif %}"
+    msg: "{% if item['location'] == '/' %}ROOT{% else %}{{ item.location }} => {{ item.location | regex_replace('^\\/|\\/$', '') }}{% endif %}.war"
+  loop: "{{ resources }}"
   tags:
   - debug
 
 - name: deploy war
   get_url:
-    url: "{{ item.1.url }}"
+    url: "{{ item.url }}"
     #dest: {{ tomcat_install_home }}/{{ tomcat_version_dir }}/webapps/{{ item.value.location }}
-    dest: "{{ tomcat_install_home }}/{{ item.0.tomcat_dir }}/webapps/{{item.1.location}}/{% if item.1.location == '/' %}ROOT{% else %}{{ item.1.location | regex_replace('^\\/|\\/$', '') }}{% endif %}.war"
-  with_subelements: 
-  - "{{ servers }}"
-  - resources
+    dest: "{{ tomcat_install_home }}/{{ tomcat_version_dir }}/webapps/{% if item.location == '/' %}ROOT{% else %}{{ item.location | regex_replace('^\\/|\\/$', '') }}{% endif %}.war"
+  loop: "{{ resources }}"
   notify: restart-tomcat
   tags:
   - install
