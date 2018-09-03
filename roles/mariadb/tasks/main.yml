@@ -290,21 +290,21 @@
   - update
 
 # update root password file for root
-#- name: copy templates
-#  template:
-#    src: "{{ item.src }}"
-#    dest: "{{ item.dest }}"
-#    owner: "{{ item.owner }}"
-#    group: "{{ item.group }}"
-#    mode: "{{ item.mode }}"
-#  with_items:
-#    - { src: ".my.cnf.j2", dest: "/root/.my.cnf",  owner: "root", group: "root", mode: "0600" }
-#  when:
-#    - mysql_root_pass is string
-#  tags: 
-#  - install
-#  - config
-#  - update
+- name: copy templates
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: "{{ item.owner }}"
+    group: "{{ item.group }}"
+    mode: "{{ item.mode }}"
+  with_items:
+    - { src: ".my.cnf.j2", dest: "/root/.my.cnf",  owner: "root", group: "root", mode: "0600" }
+  when:
+    - mysql_root_pass is string
+  tags: 
+  - install
+  - config
+  - update
 
 - name: start mysql in other nodes
   service: name=mysql state=started 
