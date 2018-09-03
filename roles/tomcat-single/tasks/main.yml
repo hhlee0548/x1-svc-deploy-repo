@@ -260,6 +260,42 @@
   tags:
   - debug
 
+- name: undeploy war - default tomcat war (docs)
+  file: path="{{ tomcat_install_home }}/{{ item.tomcat_dir }}/webapps/docs" state=absent
+  loop: "{{ servers }}"
+  tags:
+  - install
+
+- name: undeploy war - default tomcat war (exmaples)
+  file: path="{{ tomcat_install_home }}/{{ item.tomcat_dir }}/webapps/examples" state=absent
+  loop: "{{ servers }}"
+  tags:
+  - install
+
+- name: undeploy war - default tomcat war (host-manager)
+  file: path="{{ tomcat_install_home }}/{{ item.tomcat_dir }}/webapps/host-manager" state=absent
+  loop: "{{ servers }}"
+  tags:
+  - install
+
+- name: undeploy war - default tomcat war (ROOT)
+  file: path="{{ tomcat_install_home }}/{{ item.tomcat_dir }}/webapps/ROOT" state=absent
+  loop: "{{ servers }}"
+  tags:
+  - install
+
+- name: undeploy war - remove old files
+  file:
+    path: "{{ tomcat_install_home }}/{{ item.0.tomcat_dir }}/webapps/{% if item.1.location == '/' %}ROOT{% else %}{{ item.1.location | regex_replace('^\\/|\\/$', '') }}{% endif %}.war"
+    state: absent
+  with_subelements:
+  - "{{ servers }}"
+  - resources
+  notify: restart-tomcat
+  tags:
+  - deploy
+  - undeploy
+
 - name: deploy war
   get_url:
     url: "{{ item.url }}"
