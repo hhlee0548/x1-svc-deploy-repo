@@ -276,14 +276,14 @@
 
 # reset root password: because root passwd gone away after starting galera cluster
 - name: setup mysql root password
-  shell: mysql -uroot -p{{ mysql_root_pass }} -NBe "SET PASSWORD FOR 'root'@'localhost' = PASSWORD('{{ mysql_root_pass }}')"
+  shell: mysql -NBe "SET PASSWORD FOR 'root'@'localhost' = PASSWORD('{{ mysql_root_pass }}')"  # use .my.cnf file insted of direct password
   when:
   #  - start_service_result.results[0].state == "started"
     - mysql_root_pass is string
     - hostvars[mysql_master_node].ansible_host == ansible_host 
   register: setup_root_password_result
   changed_when: setup_root_password_result.rc != 0
-  ignore_errors: yes
+  #ignore_errors: yes
   tags: 
   - install
   - config

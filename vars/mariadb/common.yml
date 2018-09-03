@@ -9,7 +9,7 @@ sstuser_pass: "password"       # 배포 후 변경 불가 (미지원)
 
 master_database: "test"    
 master_username: "test"
-master_password: "password1"   # 배포 후 변경 가능
+master_password: "password2"   # 배포 후 변경 가능
 
 # Default config: can be updated
 # mysql_basedir: "/usr" 
