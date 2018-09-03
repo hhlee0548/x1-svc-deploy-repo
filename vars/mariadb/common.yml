@@ -3,9 +3,13 @@
 cluster_name: wsrep_cluster_xxx
 #mysql_master_node: mariadb2
 # 수정불가 Display(*** / 보기)
-mysql_root_pass: "password"
+mysql_root_pass: "password"   # 배포 후 변경 가능
 # 랜덤 패스워드 생성 Display No
-sstuser_pass: "password"
+sstuser_pass: "password"       # 배포 후 변경 불가 (미지원)
+
+master_database: "test"    
+master_username: "test"
+master_password: "password1"   # 배포 후 변경 가능
 
 # Default config: can be updated
 # mysql_basedir: "/usr" 

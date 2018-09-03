@@ -134,6 +134,7 @@
   - config
   - start
   - restart
+  - update
 
 - name: set galera seqno
   set_fact: seqno="{% if state_file.stdout != '' %} {{ state_file.stdout | int + 1 }} {% else %} {{ 0 }} {% endif %}"
@@ -143,6 +144,7 @@
   - config
   - start
   - restart
+  - update
 
 # transform to collection 
 - name: merge seqno
@@ -154,6 +156,7 @@
   - config
   - start
   - restart
+  - update
 
 #- name: debug
 #  debug: var=seqnos
@@ -168,6 +171,7 @@
   - config
   - start
   - restart
+  - update
 
 #- name: debug
 #  debug: var=seqno_max
@@ -187,6 +191,7 @@
   - config
   - start
   - restart
+  - update
 
 #- name: debug
 #  debug: var=mysql_master_node
@@ -249,7 +254,7 @@
 - name: create sstuser password
   shell: mysql -uroot -p{{ mysql_root_pass }} -NBe "CREATE USER 'sstuser'@'localhost' IDENTIFIED BY '{{ sstuser_pass }}'"
   when:
-    - start_service_result.results[0].state == "started"
+  #  - start_service_result.results[0].state == "started"
     - sstuser_pass is string
   register: sstuser_password_result
   changed_when: sstuser_password_result.rc != 0
@@ -257,10 +262,11 @@
   run_once: true
   tags: install
 
+
 - name: grant role to sstuser 
   shell: mysql -uroot -p{{ mysql_root_pass }} -NBe "GRANT RELOAD, LOCK TABLES, PROCESS, REPLICATION CLIENT ON *.* TO 'sstuser'@'localhost'"
   when:
-    - start_service_result.results[0].state == "started"
+  #  - start_service_result.results[0].state == "started"
     - sstuser_pass is string
   register: grant_sstuser_result
   changed_when: grant_sstuser_result.rc != 0
@@ -272,13 +278,33 @@
 - name: setup mysql root password
   shell: mysql -uroot -p{{ mysql_root_pass }} -NBe "SET PASSWORD FOR 'root'@'localhost' = PASSWORD('{{ mysql_root_pass }}')"
   when:
-    - start_service_result.results[0].state == "started"
+  #  - start_service_result.results[0].state == "started"
     - mysql_root_pass is string
+    - hostvars[mysql_master_node].ansible_host == ansible_host 
   register: setup_root_password_result
   changed_when: setup_root_password_result.rc != 0
   ignore_errors: yes
-  run_once: true
-  tags: install
+  tags: 
+  - install
+  - config
+  - update
+
+# update root password file for root
+#- name: copy templates
+#  template:
+#    src: "{{ item.src }}"
+#    dest: "{{ item.dest }}"
+#    owner: "{{ item.owner }}"
+#    group: "{{ item.group }}"
+#    mode: "{{ item.mode }}"
+#  with_items:
+#    - { src: ".my.cnf.j2", dest: "/root/.my.cnf",  owner: "root", group: "root", mode: "0600" }
+#  when:
+#    - mysql_root_pass is string
+#  tags: 
+#  - install
+#  - config
+#  - update
 
 - name: start mysql in other nodes
   service: name=mysql state=started 
@@ -312,6 +338,39 @@
   - config
   - start
   - restart
+
+## Create database & user
+- name: create master database
+  shell: mysql -uroot -p{{ mysql_root_pass }} -NBe "CREATE DATABASE IF NOT EXISTS {{ master_database }}" 
+  when:
+    - master_database is string
+    - hostvars[mysql_master_node].ansible_host == ansible_host 
+  tags: 
+  - install
+  - config
+  - update
+
+- name: create master user
+  shell: mysql -uroot -p{{ mysql_root_pass }} -NBe "GRANT ALL PRIVILEGES ON *.* To '{{ master_username }}'@'%' IDENTIFIED BY '{{ master_password }}'" 
+  when:
+    - master_username is string
+    - master_password is string
+    - hostvars[mysql_master_node].ansible_host == ansible_host 
+  tags: 
+  - install
+  - config
+  - update
+
+- name: update master user password
+  shell: mysql -uroot -p{{ mysql_root_pass }} -NBe "SET PASSWORD FOR '{{ master_username }}'@'%' = PASSWORD('{{ master_password }}')"
+  when:
+    - master_username is string
+    - master_password is string
+    - hostvars[mysql_master_node].ansible_host == ansible_host 
+  tags: 
+  - install
+  - config
+  - update
 
 - name: check cluster size with command
   shell: mysql -uroot -p{{ mysql_root_pass }} -NBe "show status where Variable_name regexp 'wsrep_cluster_status|wsrep_cluster_size|wsrep_local_state_comment|wsrep_ready'"
