@@ -150,7 +150,7 @@
   - install
 
 ## rsyslog end
-- name: config tomcat server
+- name: config tomcat server - update connector port 
   replace:
     path: "{{ tomcat_install_home }}/{{ item.tomcat_dir }}/conf/server.xml"
     regexp: '8080'
@@ -160,6 +160,30 @@
   tags:
   - install
   - config
+
+- name: config tomcat server - remove ajp13 port
+  lineinfile:
+    dest: "{{ tomcat_install_home }}/{{ item.tomcat_dir }}/conf/server.xml"
+    state: absent
+    regexp: '8009'
+  loop: "{{ servers }}"
+  notify: restart-tomcat
+  tags:
+  - install
+  - config
+
+- name: config tomcat server - update tomcat_port 
+  replace:
+    path: "{{ tomcat_install_home }}/{{ item.tomcat_dir }}/conf/server.xml"
+    regexp: '8005'
+    replace: '{{ item.http_port - 75 }}'
+  loop: "{{ servers }}"
+  notify: restart-tomcat
+  tags:
+  - install
+  - config
+
+
 
 - name: config tomcat user
   template: 
