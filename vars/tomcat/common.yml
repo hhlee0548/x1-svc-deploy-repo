@@ -8,7 +8,7 @@ servers:
     tomcat_dir: server-1
     tomcat_memory_ms: 512M
     tomcat_memory_mx: 1024M
-    http_port: 8084
+    http_port: "8084"
     
     resources:
       - name: "root service"

@@ -176,7 +176,7 @@
   replace:
     path: "{{ tomcat_install_home }}/{{ item.tomcat_dir }}/conf/server.xml"
     regexp: '8005'
-    replace: '{{ item.http_port - 75 }}'
+    replace: '{{ item.http_port | int - 75 }}'
   loop: "{{ servers }}"
   notify: restart-tomcat
   tags:
