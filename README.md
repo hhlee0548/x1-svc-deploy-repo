@@ -1,5 +1,5 @@
 # x1-svc-deploy-repo
-Ansible Repository for Service Deployment
+시스템 소프트웨어(WEB, WAS, DB, LB) 배포 용 Ansible 소스
 
 ## Ansible Controller 환경 구성
 - 배포 실행 
