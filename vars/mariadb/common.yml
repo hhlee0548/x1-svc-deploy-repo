@@ -11,6 +11,8 @@ master_database: "test"
 master_username: "test"
 master_password: "password2"   # 배포 후 변경 가능
 
+mysql_ssl_enable: true  # false
+
 # Default config: can be updated
 # mysql_basedir: "/usr" 
 # mysql_bind_address: "0.0.0.0"

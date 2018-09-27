@@ -1,7 +1,30 @@
+
+##################
+# gen mysql certificate. started
+##################
+
+- name: generate mysql certificate 
+  script: mysql-cert.sh "{{ mysql_ssl_dir }}"
+  when:
+    - mysql_ssl_enable|default(false)|bool == true
+  tags: 
+  - install
+  - config
+  - cert
+
+##################
+# gen mysql certificate. done.
+##################
+
+##################
+# gen haproxy certificate. started.
+##################
+
 - name: Ensure python OpenSSL dependencies are installed.
   pip:
     name: pyOpenSSL
     state: present
+  when: webs is defined 
   tags:
   - install
   - cert
@@ -10,6 +33,7 @@
   file:
     path: /etc/ssl/crt/
     state: directory
+  when: webs is defined 
   tags:
   - install
   - cert
@@ -18,7 +42,7 @@
   openssl_privatekey:
     path: /etc/ssl/crt/{{ item.key }}.pem
   with_dict: "{{ webs }}"
-  when: item.value.ssl_cert_type == "self"
+  when: webs is defined and item.value.ssl_cert_type == "self"
   tags:
   - install
   - cert
@@ -29,7 +53,7 @@
     privatekey_path: /etc/ssl/crt/{{ item.key }}.pem
     common_name: "{{ item.value.ssl_cert_common_name }}"
   with_dict: "{{ webs }}"
-  when: item.value.ssl_cert_type == "self"
+  when: webs is defined and item.value.ssl_cert_type == "self"
   tags:
   - install
   - cert
@@ -41,7 +65,7 @@
     path: /etc/ssl/crt/{{ item.key }}.crt
     provider: selfsigned
   with_dict: "{{ webs }}"
-  when: item.value.ssl_cert_type == "self"
+  when: webs is defined and item.value.ssl_cert_type == "self"
   tags:
   - install
   - cert
@@ -52,7 +76,7 @@
     dest: /etc/ssl/crt/{{ item.key }}.one
     regexp: "{{ item.key }}.(pem|crt)"
   with_dict: "{{ webs }}"
-  when: item.value.ssl_cert_type == "self"
+  when: webs is defined and item.value.ssl_cert_type == "self"
   tags:
   - install
   - cert
@@ -66,7 +90,11 @@
     acme_challenge_path: /etc/ssl/crt/{{ item.key }}/
     force: True
   with_dict: "{{ webs }}"
-  when: item.value.ssl_cert_type == "acme"
+  when: webs is defined and item.value.ssl_cert_type == "acme"
   tags:
   - install
   - cert
+
+##################
+# gen haproxy certificate. done.
+##################

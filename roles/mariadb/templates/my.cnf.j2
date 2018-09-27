@@ -112,9 +112,11 @@ innodb_locks_unsafe_for_binlog = {{ mysql_innodb_locks_unsafe_for_binlog }}
 #
 # For generating SSL certificates I recommend the OpenSSL GUI "tinyca".
 #
-# ssl-ca=/etc/mysql/cacert.pem
-# ssl-cert=/etc/mysql/server-cert.pem
-# ssl-key=/etc/mysql/server-key.pem
+{% if mysql_ssl_enable|default(false)|bool == true %}
+ssl-ca={{ mysql_ssl_dir }}/ca-cert.pem
+ssl-cert={{ mysql_ssl_dir }}/server-cert.pem
+ssl-key={{ mysql_ssl_dir }}/server-key.pem
+{% endif %}
 
 #
 # * Galera-related settings

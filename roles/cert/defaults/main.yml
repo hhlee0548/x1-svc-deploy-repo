@@ -1,0 +1,3 @@
+---
+# defaults file 
+mysql_ssl_dir: "/etc/mysql/ssl"

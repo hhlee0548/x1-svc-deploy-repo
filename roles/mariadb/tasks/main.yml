@@ -19,6 +19,7 @@
   apt_repository:
     repo: "{{ item.repo }}"
     state: "{{ item.state }}"
+    update_cache: yes
   with_items: "{{ _apt_repository }}"
   tags: install
 
@@ -50,6 +51,7 @@
   file: path={{ item }} state=directory owner=mysql group=mysql
   with_items:
     - /etc/mysql/conf.d
+    - /etc/mysql/ssl
     - /var/log/mysql
   tags:
     - install
@@ -62,6 +64,30 @@
     #- { src: "galera.cnf.j2", dest: "/etc/mysql/conf.d/galera.cnf" }
     - { src: "mariadb.cnf.j2", dest: "/etc/mysql/conf.d/mariadb.cnf" }
     - { src: "my.cnf.j2", dest: "/etc/mysql/my.cnf" }
+  tags:
+  - install
+  - config
+
+##################
+# copy certificate
+##################
+- name: copy certificate
+  synchronize: 
+    src: "{{ mysql_ssl_dir }}/"    
+    dest: "{{ mysql_ssl_dir }}"
+    recursive: yes
+    rsync_opts:
+      - "--chmod=F644"
+  when:
+    - mysql_ssl_enable|default(false)|bool == true 
+  tags:
+  - install
+  - config
+
+- name: change ownership certificate
+  file: dest="{{ mysql_ssl_dir }}" owner=mysql group=mysql mode=u=rwX,g=rX,o=rX recurse=yes
+  when:
+    - mysql_ssl_enable|default(false)|bool == true 
   tags:
   - install
   - config

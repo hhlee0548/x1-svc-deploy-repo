@@ -37,3 +37,6 @@ mysql_thread_cache_size: "8"
 mysql_thread_stack: "256K"
 mysql_tmpdir: "/tmp"
 mysql_user: "mysql"
+
+mysql_ssl_dir: "/etc/mysql/ssl"
+mysql_ssl_enable: false
