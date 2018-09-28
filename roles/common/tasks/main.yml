@@ -1,3 +1,9 @@
+- name: update apt pakcage
+  apt:
+    update_cache: yes
+  tags:
+  - install
+
 - name: common file exists
   stat:
     path: vars/install.yml
