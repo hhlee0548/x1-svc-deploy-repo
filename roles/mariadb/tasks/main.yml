@@ -256,8 +256,33 @@
 
 - name: stop mysql services
   service: name=mysql state=stopped
-  notify: force-stop-mysql
+  #notify: force-stop-mysql
   changed_when: True
+  tags:
+  - install
+  - config
+  - remove
+  - stop
+  - start
+  - restart
+
+- name: check running mysqld process
+  shell: "ps -ef | grep -v grep | grep mysqld | awk '{print $2}'"
+  register: running_process
+  listen: "force-stop-mysql"
+  tags:
+  - install
+  - config
+  - remove
+  - stop
+  - start
+  - restart
+
+- name: force stop mysqld
+  shell: "kill -9 {{ item }}"
+  with_items: "{{ running_process.stdout_lines }}"
+  listen: "force-stop-mysql"
+  ignore_errors: yes
   tags:
   - install
   - config
