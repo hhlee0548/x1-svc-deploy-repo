@@ -1,8 +1,9 @@
-- name: update apt pakcage
-  apt:
-    update_cache: yes
-  tags:
-  - install
+#- name: update apt pakcage
+#  apt:
+#    update_cache: yes
+#  tags:
+#  - install
+# Failed to lock apt for exclusive operation 발생
 
 - name: common file exists
   stat:
