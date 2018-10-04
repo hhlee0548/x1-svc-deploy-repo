@@ -23,6 +23,7 @@
   retries: 48
   tags:
   - install
+  - image
 
 - name: debug create nginx server directories
   debug:

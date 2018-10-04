@@ -22,6 +22,7 @@
   retries: 48
   tags:
   - install
+  - image
 
 - name: config keepalived.conf
   template: 

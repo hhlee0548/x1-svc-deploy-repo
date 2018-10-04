@@ -11,6 +11,7 @@
   - /var/lib/dpkg/lock 
   tags:
   - install
+  - image
 
 - name: install openjdk
   apt: pkg={{ java_package }} state=present
@@ -19,8 +20,8 @@
   delay: 5
   retries: 48
   tags:
-  - step
   - install
+  - image
 
 #- name: install tomcat
 #  apt: pkg={{ item }} state=latest
@@ -42,11 +43,13 @@
   - debug
   - status
   - info
+  - image
 
 - name: download tomcat
   get_url: url={{ tomcat_download_url }} dest=/tmp/{{ tomcat_version_dir }}.tar.gz
   tags:
   - install
+  - image
 
 - name: create tomcat directory 
   file:
@@ -55,6 +58,7 @@
   loop: "{{ servers }}"
   tags:
   - install
+  - image
 
 - name: extract archive
   unarchive:
@@ -65,6 +69,7 @@
   loop: "{{ servers }}"
   tags:
   - install
+  - image
 
 
 - name: add group "tomcat"

@@ -4,7 +4,7 @@
 
 - name: include release specific variables
   include_vars: "{{ ansible_distribution_release }}.yml"
-  tags: [install, remove]
+  tags: [install, remove, image]
 
 - name: apt-key add
   apt_key:
@@ -13,7 +13,7 @@
     url: "{{ item.url | default(None) or omit }}"
     state: "{{ item.state }}"
   with_items: "{{ _apt_key }}"
-  tags: install
+  tags: [install, image]
 
 - name: apt-add-repository
   apt_repository:
@@ -21,7 +21,7 @@
     state: "{{ item.state }}"
     update_cache: yes
   with_items: "{{ _apt_repository }}"
-  tags: install
+  tags: [install, image]
 
 - name: remove lock files
   file:
@@ -32,8 +32,7 @@
   - /var/cache/apt/archives/lock
   - /var/lib/dpkg/lock 
   - /var/lib/dpkg/updates/*
-  tags:
-  - install
+  tags: [install, image]
 
 - name: apt-get install
   apt:
@@ -45,7 +44,7 @@
   until: apt_status is success
   delay: 5
   retries: 48
-  tags: install
+  tags: [install, image]
 
 - name: create required mysql directories
   file: path={{ item }} state=directory owner=mysql group=mysql
@@ -53,8 +52,7 @@
     - /etc/mysql/conf.d
     - /etc/mysql/ssl
     - /var/log/mysql
-  tags:
-    - install
+  tags: [install, image]
 
 - name: copy templates
   template:

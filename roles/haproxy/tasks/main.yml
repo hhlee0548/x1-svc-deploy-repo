@@ -6,6 +6,7 @@
   - haproxy
   tags:
   - install
+  - image
 
 - name: Ensure directory exists for ssl
   file:
