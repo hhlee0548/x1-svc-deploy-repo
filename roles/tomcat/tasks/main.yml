@@ -211,15 +211,16 @@
   become: true
   systemd: name=tomcat_{{ item.tomcat_dir }} state=stopped 
   loop: "{{ servers }}"
+  ignore_errors: yes
   tags:
   - stop
   - remove
   - image
 
-- name: disable tomcat
-  systemd: name=tomcat enabled=no
-  tags:
-  - image
+#- name: disable tomcat
+#  systemd: name=tomcat enabled=no
+#  tags:
+#  - image
 
 - name: remove tomcat
   file: path={{ tomcat_install_home }}/{{ item.tomcat_dir }} state=absent

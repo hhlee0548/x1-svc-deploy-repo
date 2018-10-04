@@ -1,0 +1,14 @@
+[keepalived]
+keepalived1 ansible_host=192.168.122.18
+
+[haproxy]
+haproxy1 ansible_host=192.168.122.18
+
+[nginx]
+nginx1 ansible_host=192.168.122.18
+
+[tomcat]
+tomcat1 ansible_host=192.168.122.18
+
+[mariadb]
+mariadb1 ansible_host=192.168.122.18
