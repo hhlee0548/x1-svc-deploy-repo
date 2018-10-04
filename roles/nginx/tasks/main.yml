@@ -133,6 +133,12 @@
   systemd: name=nginx state=stopped
   tags:
   - stop
+  - image
+
+- name: disable nginx
+  systemd: name=nginx enabled=no
+  tags:
+  - image
 
 - name: start nginx
   systemd: name=nginx state=started

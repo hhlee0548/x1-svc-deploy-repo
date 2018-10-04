@@ -83,6 +83,12 @@
   systemd: name=haproxy state=stopped
   tags:
   - stop
+  - image
+
+- name: disable haproxy
+  systemd: name=haproxy enabled=no
+  tags:
+  - image
 
 - name: start haproxy
   systemd: name=haproxy state=started

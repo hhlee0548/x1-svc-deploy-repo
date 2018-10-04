@@ -44,6 +44,12 @@
   systemd: name=keepalived state=stopped
   tags:
   - stop
+  - image
+
+- name: disable keepalived
+  systemd: name=keepalived enabled=no
+  tags:
+  - image
 
 - name: start keepalived
   systemd: name=keepalived state=started

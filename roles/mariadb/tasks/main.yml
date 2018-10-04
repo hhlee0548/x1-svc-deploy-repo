@@ -263,6 +263,7 @@
   - stop
   - start
   - restart
+  - image
 
 - name: check running mysqld process
   shell: "ps -ef | grep -v grep | grep mysqld | awk '{print $2}'"
@@ -275,6 +276,7 @@
   - stop
   - start
   - restart
+  - image
 
 - name: force stop mysqld
   shell: "kill -9 {{ item }}"
@@ -288,6 +290,12 @@
   - stop
   - start
   - restart
+  - image
+
+- name: disable mysql
+  systemd: name=mysql enabled=no
+  tags:
+  - image
 
 - name: bootstrap mysql service
   shell: service mysql start --wsrep-new-cluster
