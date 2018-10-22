@@ -46,6 +46,41 @@
   retries: 48
   tags: [install, image]
 
+- name: enable mysql
+  systemd: name=mysql enabled=yes
+  tags:
+  - install
+
+- name: check mysql service link
+  stat:
+    path: /etc/systemd/system/mysql.service
+  register: mysql_link
+  tags:
+  - install
+
+- name: link mysql service
+  shell: |
+    ln -s /lib/systemd/system/mariadb.service /etc/systemd/system/mysql.service;
+    ln -s /lib/systemd/system/mariadb.service /etc/systemd/system/mysqld.service;
+    ln -s /lib/systemd/system/mariadb.service /etc/systemd/system/multi-user.target.wants/mariadb.service;
+  when: mysql_link.stat.exists == False
+  ignore_errors: yes
+  tags:
+  - install
+
+- name: reload systemctl daemon
+  shell: systemctl daemon-reload
+  ignore_errors: yes
+  tags:
+  - install
+
+- name: start service
+  shell: systemctl restart mysql
+  ignore_errors: yes
+  tags:
+  - install
+
+
 - name: create required mysql directories
   file: path={{ item }} state=directory owner=mysql group=mysql
   with_items:
